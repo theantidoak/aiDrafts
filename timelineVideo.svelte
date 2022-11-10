@@ -10,7 +10,6 @@
   let mobileVersion = screenWidth > 1024 ? false : true;
   let altVersion = false;
   let forwardInTime;
-  const checkIfMathematicians = document.querySelector(".article-page__article h1").textContent == "Influential Mathematicians Timeline" ? true : false;
   let backCount = false;
 
   document.documentElement.style.overflowX = "hidden";
@@ -133,7 +132,7 @@
   }
 
   function topPeople(index) {
-    const people = data.items
+    let people = data.items
       .filter(
         (person) => person.skip <= index && person.years[index - person.skip] > 0
       )
@@ -141,6 +140,9 @@
         ...person,
         score: person.years[index - person.skip],
       }));
+    people = data.years[index] > 1900
+      ? people.filter((person) => data.years[index] - person.birthYear < 99) 
+      : people;
     people.sort((a, b) => b.score - a.score);
 
     return screenSizeOutput(people);
@@ -199,7 +201,7 @@
     } else {
       if (influentialPeople[0].score > 400 && screenHeight > 680) {
         graphScale.push(464);
-      } else if (influentialPeople[0].score < 107 || screenHeight <= 680 || (checkIfMathematicians && influentialPeople[0].score < 110)) {
+      } else if (influentialPeople[0].score < 107 || screenHeight <= 680) {
         graphScale.push(250);
       } else {
         graphScale.push(influentialPeople[0].score * 1.16);
@@ -539,8 +541,8 @@
   width: 100%;
   display: flex;
   margin: 0 auto;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
   z-index: 5;
   position: relative;
@@ -646,7 +648,7 @@ input[type=checkbox] + label:active:after {
   background-position: center;
   background-size: cover;
   border-radius: 50%;
-  filter: brightness(.65);
+  filter: brightness(1);
   will-change: transform;
   width: 126%;
   height: 82rem;
