@@ -51,6 +51,7 @@
         score: person.years[index - person.skip],
       }));
     people.sort((a, b) => b.score - a.score);
+    
 
     return screenSizeOutput(people);
   }
@@ -91,6 +92,9 @@
   }
 
   function defaultImg(person) {
+    if (person.name === "John Philoponus") {
+      return "https://res.cloudinary.com/academicinfluence/image/upload/v1668180117/getting-started/john-philoponus-4.png";
+    }
     if (person.image === "") {
       return "https://res.cloudinary.com/academicinfluence/image/upload/v1667505750/getting-started/Screenshot_2022-11-03_at_21.01.57.png"
     }
@@ -265,12 +269,15 @@
     spin += (currentYearIndex - previousYearIndex) * 32;
     forwardInTime = true;
     previousYearIndex = currentYearIndex;
+    personFact.parentElement.style = "block";
     personFact.textContent = personFact !== undefined ? displayFact() : "";
     highlightedPerson.src = highlightedPerson !== undefined ? displayImage() : "";
   } else if (previousYearIndex > currentYearIndex) {
     spin -= (previousYearIndex - currentYearIndex) * 32;
     forwardInTime = false;
     previousYearIndex = currentYearIndex;
+    personFact.textContent = personFact !== undefined ? displayFact() : "";
+    highlightedPerson.src = highlightedPerson !== undefined ? displayImage() : "";
   }
 
   /*setTimeout(function() {
@@ -287,12 +294,41 @@
     let person;
     if (year >= -300 && year < 100) {
       person = topPeople(currentYearIndex).filter((person) => person.name === "Aristotle");
+      return person[0].image;
     } else if (year >= 100 && year < 700) {
       person = topPeople(currentYearIndex).filter((person) => person.name === "Archimedes");
+      return person[0].image;
     } else if (year >= 700 && year < 1100) {
       person = topPeople(currentYearIndex).filter((person) => person.name === "John Philoponus");
+      return "https://res.cloudinary.com/academicinfluence/image/upload/v1668180117/getting-started/john-philoponus-4.png";
+    } else if (year >= 1100 && year < 1500) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Avicenna");
+      return person[0].image;
+    } else if (year >= 1500 && year < 1800) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Nicolaus Copernicus");
+      return person[0].image;
+    } else if (year >= 1800 && year < 1910) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Isaac Newton");
+      return person[0].image;
+    } else if (year >= 1910 && year < 1970) { 
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Albert Einstein");
+      return person[0].image;
+    } else if (year >= 1970 && year < 2001) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Werner Heisenberg");
+      return person[0].image;
+    } else if (year >= 2001 && year < 2008) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Richard Feynman");
+      return person[0].image;
+    } else if (year >= 2008 && year < 2013) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Peter Higgs");
+      return person[0].image;
+    } else if (year >= 2013 && year < 2017) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Max Planck");
+      return person[0].image;
+    } else if (year >= 2017 && year < 2022) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Roger Penrose");
+      return person[0].image;
     }
-    return person[0].image;
   }
 
   function displayFact() {
@@ -303,6 +339,24 @@
       return `"Archimedes of Syracuse was a Greek mathematician, physicist, engineer, astronomer, and inventor from the ancient city of Syracuse in Sicily. Although few details of his life are known, he is regarded as one of the leading scientists in classical antiquity."`
     } else if (year >= 700 && year < 1100) {
       return `"John Philoponus broke from the Aristotelian–Neoplatonic tradition, questioning methodology and eventually leading to empiricism in the natural sciences. He was one of the first to propose a "theory of impetus" similar to the modern concept of inertia over Aristotelian dynamics."`
+    } else if (year >= 1100 && year < 1500) {
+      return `"Ibn Sina , commonly known in the West as Avicenna, was a Persian polymath who is regarded as one of the most significant physicians, astronomers, philosophers, and writers of the Islamic Golden Age, and the father of early modern medicine."`;
+    } else if (year >= 1500 && year < 1800) {
+      return `"Nicolaus Copernicus was a Renaissance polymath, active as a mathematician, astronomer, and Catholic canon, who formulated a model of the universe that placed the Sun rather than Earth at its center."`;
+    } else if (year >= 1800 && year < 1910) {
+      return `"Sir Isaac Newton was an English mathematician, physicist, astronomer, alchemist, theologian, and author , widely recognised as one of the greatest mathematicians and physicists of all time and among the most influential scientists."`;
+    } else if (year >= 1910 && year < 1970) { 
+      return `"Albert Einstein (1879-1955) was the greatest scientist of the 20th century, bar none. In fact, he’s probably the second-most original and influential scientist of all time-after Isaac Newton... But it’s close. Einstein’s later general theory of relativity revolutionized Newton’s theory of gravitation and laid the foundations for all of modern cosmology. It still stands to this day as the twin pillar of modern physics, alongside the quantum theory."`;
+    } else if (year >= 1970 && year < 2001) {
+      return `"Werner Karl Heisenberg was a German theoretical physicist and one of the main pioneers of the theory of quantum mechanics. He is known for the uncertainty principle, which he published in 1927. Heisenberg was awarded the 1932 Nobel Prize in Physics 'for the creation of quantum mechanics'."`;
+    } else if (year >= 2001 && year < 2008) {
+      return `"Richard Phillips Feynman was an American theoretical physicist, known for his work in the path integral formulation of quantum mechanics, the theory of quantum electrodynamics, the physics of the superfluidity of supercooled liquid helium, as well as his work in particle physics for which he proposed the parton model."`;
+    } else if (year >= 2008 && year < 2013) {
+      return `"Peter Higgs is best known for postulating the existence of a field that exists throughout all of space which gives mass to fundamental particles, now known as the Higgs Field. His early work led to the prediction of the Higgs Boson, a particle later empirically confirmed by experiment in the Large Hadron Collider located in Switzerland at CERN. His discovery is considered an important contribution to the standard model of physics."`;
+    } else if (year >= 2013 && year < 2017) {
+      return `"Max Karl Ernst Ludwig Planck was a German theoretical physicist whose discovery of energy quanta won him the Nobel Prize in Physics in 1918. Planck made many substantial contributions to theoretical physics, but his fame as a physicist rests primarily on his role as the originator of quantum theory, which revolutionized human understanding of atomic and subatomic processes."`;
+    } else if (year >= 2017 && year < 2022) {
+      return `"Sir Roger Penrose is best known for his significant contributions to the mathematical physics of general relativity and cosmology. Penrose is now widely regarded as among the greatest living mathematical physicists."`;
     }
   }
 
@@ -319,7 +373,6 @@
   let colorSchemes = [scheme0, scheme1, scheme2, scheme3, scheme4, scheme5, scheme6, scheme7, scheme8, scheme9];
 
   function changeBGColor3(currentPerson, index) {
-    console.log(currentPerson.name);
     let colors;
     const previousIndex = getPreviousIndex(currentPerson, index);
     const previousPeople = forwardInTime 
@@ -384,8 +437,13 @@
   function convertScore2(person) {
     const influentialPeople = topPeople(currentYearIndex);
     const originalScale = [influentialPeople[influentialPeople.length - 1].score, influentialPeople[0].score];
+    let graphScale;
+    if (influentialPeople[influentialPeople.length - 1].score > 250) {
+      graphScale = [250, 925];
+    } else {
+      graphScale = [influentialPeople[influentialPeople.length - 1].score, 925];
+    }
 
-    const graphScale = [124, 800];
     return (person.score - originalScale[0]) * (graphScale[1] - graphScale[0]) / (originalScale[1] - originalScale[0]) + graphScale[0];
   }
 
@@ -401,18 +459,18 @@
   <div class="timeline-container">
     <p id="current-year-2">{changeYeartoBC(data.years[currentYearIndex])}</p>
     <span class="cover-2" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
-    <div class="timeline-graph-2" on:wheel={scrollToChangeYear}>
-    <div class="person-fact-2">
-      <img style="position: absolute; height:5rem; width: 5rem; top: 0; left: -5rem;" bind:this={highlightedPerson} /> 
+    <div style="display: none;" class="person-fact-2">
+      <img style="position: absolute; height:5rem; width: 5rem; left: 0; bottom: -5rem;" bind:this={highlightedPerson} /> 
       <p style="margin: 0;" bind:this={personFact}></p>
-      <p style="font-size:1rem; position: absolute; top: -1.5rem; margin:0; color: black; left:0;">According to Wikipedia,</p>
+      <p style="font-size:.8rem; position: absolute; bottom: -1.25rem; margin:0; color: black; right:0;">Source: Wikipedia</p>
     </div>
+    <div class="timeline-graph-2" on:wheel={scrollToChangeYear}>
       {#each topPeople(currentYearIndex) as person, i (person.name)}
-        <a out:fly={{ x: -300, duration: 1800, delay: 100 }} in:fly={{ y: 100 * (10 - (i+1)), duration: 2600, delay: 50 }} animate:flip|local={{ duration: 2600, delay: 25 }} class="rank-2" href="/people/{person.slug}" target="_blank">
-          <img src={defaultImg(person)} width="46" height="46" alt="image of {person.name}" />
+        <a out:fly={{ x: -300, duration: 1800, delay: 100 }} in:fly={{ y: 100 * (11 - (i+1)), duration: 2600, delay: 50 }} animate:flip|local={{ duration: 2600, delay: 25 }} class="rank-2" href="/people/{person.slug}" target="_blank">
+          <img src={defaultImg(person)} style="margin-right:.25rem; width:46px; height:46px" alt="image of {person.name}" />
           <div class="grid-2 grid-ref-{i}" style="background-color:{changeBGColor3(person, i)[1]}; width:{convertScore2(person)}px"></div>
           <p class="name-plate-2" style="color:{changeFontColor2(person, i)};">{person.name}</p>
-          <div style="color:{changeBGColor(person, i)}" class="ranking-difference-2">
+          <div style="color:{changeBGColor(person, i)}; min-width: 2rem;" class="ranking-difference-2">
             <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
             <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
           </div>
@@ -634,8 +692,8 @@ input[type=checkbox] + label:active:after {
   position: absolute;
   z-index: 1;
   margin: 0;
-  bottom: 5rem;
-  right: 20rem;
+  bottom: 3rem;
+  right: 18.5rem;
   background-color: #0175a1;
   border-radius: 6px;
   padding: 1rem .75rem;
@@ -652,9 +710,9 @@ input[type=checkbox] + label:active:after {
   border-radius: 50%;
   filter: brightness(1);
   transition: transform linear 3s;
-  width: 15rem;
-  height: 15rem;
-  right: 4rem;
+  width: 13rem;
+  height: 13rem;
+  right: 2rem;
   bottom: 0rem;
   z-index: 0;
 }
@@ -663,21 +721,23 @@ input[type=checkbox] + label:active:after {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: .75rem;
+  gap: 1rem;
   position: relative;
   top: 0rem;
   width: 100%;
+  z-index: 2;
 }
 
 .person-fact-2 {
   position: absolute;
-  right: 0rem;
-  top: 7rem;
+  right: 1rem;
+  bottom: 14rem;
   padding: .75rem;
   height: fit-content;
-  width: 22rem;
+  width: 29rem;
   background-color: #0175a1;
   color: white;
+  z-index: 1;
 }
 
 .rank-2 {
@@ -692,6 +752,7 @@ input[type=checkbox] + label:active:after {
   display: flex;
   align-items: center;
   transition: width 2s ease;
+  border-radius: 8px;
 }
 
 .name-plate-2 {
