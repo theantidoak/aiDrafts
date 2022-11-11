@@ -258,14 +258,52 @@
     }
   }
 
+  let personFact;
+  let highlightedPerson;
+
   $: if (previousYearIndex < currentYearIndex) {
-    spin += (currentYearIndex - previousYearIndex) * 8;
+    spin += (currentYearIndex - previousYearIndex) * 32;
     forwardInTime = true;
     previousYearIndex = currentYearIndex;
+    personFact.textContent = personFact !== undefined ? displayFact() : "";
+    highlightedPerson.src = highlightedPerson !== undefined ? displayImage() : "";
   } else if (previousYearIndex > currentYearIndex) {
-    spin -= (previousYearIndex - currentYearIndex) * 8;
+    spin -= (previousYearIndex - currentYearIndex) * 32;
     forwardInTime = false;
     previousYearIndex = currentYearIndex;
+  }
+
+  /*setTimeout(function() {
+    const interval = setInterval(function() {
+      if (currentYearIndex === data.years.length - 2) {
+        clearInterval(interval);
+      }
+      currentYearIndex += 1;
+    }, 3000)
+  }, 7000);*/
+
+  function displayImage() {
+    const year = data.years[currentYearIndex];
+    let person;
+    if (year >= -300 && year < 100) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Aristotle");
+    } else if (year >= 100 && year < 700) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "Archimedes");
+    } else if (year >= 700 && year < 1100) {
+      person = topPeople(currentYearIndex).filter((person) => person.name === "John Philoponus");
+    }
+    return person[0].image;
+  }
+
+  function displayFact() {
+    const year = data.years[currentYearIndex];
+    if (year >= -300 && year < 100) {
+      return `"Aristotle's philosophy has exerted a unique influence on almost every form of knowledge in the West and it continues to be a subject of contemporary philosophical discussion."`
+    } else if (year >= 100 && year < 700) {
+      return `"Archimedes of Syracuse was a Greek mathematician, physicist, engineer, astronomer, and inventor from the ancient city of Syracuse in Sicily. Although few details of his life are known, he is regarded as one of the leading scientists in classical antiquity."`
+    } else if (year >= 700 && year < 1100) {
+      return `"John Philoponus broke from the Aristotelian–Neoplatonic tradition, questioning methodology and eventually leading to empiricism in the natural sciences. He was one of the first to propose a "theory of impetus" similar to the modern concept of inertia over Aristotelian dynamics."`
+    }
   }
 
   const scheme0 = ["white", "rgb(1, 146, 201)", ""];
@@ -281,6 +319,7 @@
   let colorSchemes = [scheme0, scheme1, scheme2, scheme3, scheme4, scheme5, scheme6, scheme7, scheme8, scheme9];
 
   function changeBGColor3(currentPerson, index) {
+    console.log(currentPerson.name);
     let colors;
     const previousIndex = getPreviousIndex(currentPerson, index);
     const previousPeople = forwardInTime 
@@ -295,21 +334,18 @@
     if (previousIndex !== -1 && !checkList) {
       colors = colorSchemes[index];
       colorSchemes[index][2] = currentPerson.name;
-    } else if (currentYearIndex === 0) {
-      colors = colorSchemes[index];
-      colorSchemes[index][2] = currentPerson.name;
     } else if (previousIndex === -1) {
       const availableColors = colorSchemes.filter((scheme) => scheme[2] === "");
       const existingPeople = colorSchemes.filter((scheme) => scheme[2] !== "").map((scheme) => scheme[2]);
-      const newPeople = topPeople(currentYearIndex).filter((person, i) => getPreviousIndex(person, i) === -1)
+      const newPeople = topPeople(currentYearIndex)
+        .filter((person, i) => getPreviousIndex(person, i) === -1)
         .filter((person) => existingPeople.indexOf(person.name) === -1);
       const newIndex = newPeople.map((person) => person.name).indexOf(currentPerson.name);
       if (newIndex >= availableColors.length || availableColors.length === 0) {
-        colors = colorSchemes[newIndex];
+        colors = colorSchemes[index];
       } else {
-        colors = availableColors[newIndex];
+        colors = newIndex !== -1 ? availableColors[newIndex] : availableColors[newIndex + 1];
       }
-
       colorSchemes.forEach((scheme) => {
         scheme[2] = scheme[1] === colors[1] ? currentPerson.name : scheme[2];
       });
@@ -320,32 +356,36 @@
     return colors;
   }
 
-  function changeFontColor2(currentPerson) {
-    const targetPerson = colorSchemes.filter((scheme) => scheme[2] === currentPerson.name);
+  function changeFontColor2(currentPerson, index) {
+    const previousIndex = getPreviousIndex(currentPerson, index);
+
+    if (previousIndex === -1) {
+      return "rgb(255, 133, 20)";
+    }
+
+    if (index < previousIndex && previousIndex >= 0) {
+      return "#0192c9";
+    }
+
+    if (index > previousIndex && previousIndex >= 0) {
+      return "#003a50";
+    }
+
+    return "#0175a1";
+    
+    /*const targetPerson = colorSchemes.filter((scheme) => scheme[2] === currentPerson.name);
     if (targetPerson[0][1] === "rgb(249, 184, 100)" || targetPerson[0][1] === "rgb(230, 244, 250)") {
       return "black"
     }
 
-    return "white";
+    return "white";*/
   }
 
   function convertScore2(person) {
-    let graphScale = [124];
     const influentialPeople = topPeople(currentYearIndex);
     const originalScale = [influentialPeople[influentialPeople.length - 1].score, influentialPeople[0].score];
-    if ((mobileVersion && !altVersion) || (!mobileVersion && altVersion)) {
-      const screenAdjustment = screenWidth * .65;
-      graphScale = [135, screenAdjustment];
-    } else {
-      if (influentialPeople[0].score > 53) {
-        graphScale.push(800);
-      } else if (influentialPeople[0].score < 25) {
-        graphScale.push(250);
-      } else {
-        graphScale.push(influentialPeople[0].score * 15);
-      }
-    }
 
+    const graphScale = [124, 800];
     return (person.score - originalScale[0]) * (graphScale[1] - graphScale[0]) / (originalScale[1] - originalScale[0]) + graphScale[0];
   }
 
@@ -362,13 +402,20 @@
     <p id="current-year-2">{changeYeartoBC(data.years[currentYearIndex])}</p>
     <span class="cover-2" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
     <div class="timeline-graph-2" on:wheel={scrollToChangeYear}>
+    <div class="person-fact-2">
+      <img style="position: absolute; height:5rem; width: 5rem; top: 0; left: -5rem;" bind:this={highlightedPerson} /> 
+      <p style="margin: 0;" bind:this={personFact}></p>
+      <p style="font-size:1rem; position: absolute; top: -1.5rem; margin:0; color: black; left:0;">According to Wikipedia,</p>
+    </div>
       {#each topPeople(currentYearIndex) as person, i (person.name)}
-        <a animate:flip|local={{ duration: 2000, delay: 25 }} class="rank-2" href="/people/{person.slug}" target="_blank">
-          <img out:fly={{ x: -500, duration: 1300, delay: 100 }} in:fly={{ x: 500, duration: 2000, delay: 50 }} src={defaultImg(person)} width="46" height="46" alt="image of {person.name}" />
-          <div out:fly={{ x: -500, duration: 1300, delay: 100 }} in:fly={{ x: 500, duration: 2000, delay: 50 }} class="grid-2 grid-ref-{i}" style="background-color:{changeBGColor3(person, i)[1]}; color:{changeFontColor2(person)}; width:{convertScore2(person)}px">
-            <p class="name-plate-2">{person.name}</p>
+        <a out:fly={{ x: -300, duration: 1800, delay: 100 }} in:fly={{ y: 100 * (10 - (i+1)), duration: 2600, delay: 50 }} animate:flip|local={{ duration: 2600, delay: 25 }} class="rank-2" href="/people/{person.slug}" target="_blank">
+          <img src={defaultImg(person)} width="46" height="46" alt="image of {person.name}" />
+          <div class="grid-2 grid-ref-{i}" style="background-color:{changeBGColor3(person, i)[1]}; width:{convertScore2(person)}px"></div>
+          <p class="name-plate-2" style="color:{changeFontColor2(person, i)};">{person.name}</p>
+          <div style="color:{changeBGColor(person, i)}" class="ranking-difference-2">
+            <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
+            <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
           </div>
-          <p out:fly={{ x: -500, duration: 1300, delay: 100 }} in:fly={{ x: 500, duration: 2000, delay: 50 }} class="name-plate-2">{person.score}</p>
         </a>
       {/each}
     </div>
@@ -587,8 +634,8 @@ input[type=checkbox] + label:active:after {
   position: absolute;
   z-index: 1;
   margin: 0;
-  top: 16rem;
-  right: 6rem;
+  bottom: 5rem;
+  right: 20rem;
   background-color: #0175a1;
   border-radius: 6px;
   padding: 1rem .75rem;
@@ -604,11 +651,11 @@ input[type=checkbox] + label:active:after {
   background-size: cover;
   border-radius: 50%;
   filter: brightness(1);
-  transition: transform linear .5s;
+  transition: transform linear 3s;
   width: 15rem;
   height: 15rem;
   right: 4rem;
-  bottom: 4rem;
+  bottom: 0rem;
   z-index: 0;
 }
 
@@ -616,11 +663,21 @@ input[type=checkbox] + label:active:after {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1rem;
+  gap: .75rem;
   position: relative;
+  top: 0rem;
   width: 100%;
-  height: 40rem;
-  margin: 0 2rem;
+}
+
+.person-fact-2 {
+  position: absolute;
+  right: 0rem;
+  top: 7rem;
+  padding: .75rem;
+  height: fit-content;
+  width: 22rem;
+  background-color: #0175a1;
+  color: white;
 }
 
 .rank-2 {
@@ -631,7 +688,6 @@ input[type=checkbox] + label:active:after {
 }
 
 .grid-2 {
-  border: 2px solid black;
   height: 46px;
   display: flex;
   align-items: center;
