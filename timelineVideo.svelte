@@ -420,6 +420,20 @@
         </div>
       {/each}
     </div>
+    {:else if currentYearIndex === 0}
+    <div class="timeline-graph-video" on:wheel={scrollToChangeYear}>
+      <div class="image-container">
+        <!--<img class="speakers" style="position:absolute; width: 100%; height:100%" src="https://res.cloudinary.com/academicinfluence/image/upload/v1668427669/timeline-video/Screenshot_2022-11-14_at_12.57.25.png" />-->
+        <div class="thermo-div">
+          <div class="outer-thermo"><div class="inner-thermo"></div></div>
+          <img class="thermometer" style="position:absolute; width: 100%; height:100%" src="https://res.cloudinary.com/academicinfluence/image/upload/v1668427670/timeline-video/Screenshot_2022-11-14_at_12.58.22.png" />
+        </div>
+        <!--<video src="https://res.cloudinary.com/academicinfluence/video/upload/v1668446171/timeline-video/temp-vid.mp4" loop autoplay muted />
+        <video src="https://res.cloudinary.com/academicinfluence/video/upload/v1668446166/timeline-video/speaker-vid.mp4" loop autoplay muted />
+        <video src="https://res.cloudinary.com/academicinfluence/video/upload/v1668446158/timeline-video/magnet-vid.mp4" loop autoplay muted />
+        <video src="https://res.cloudinary.com/academicinfluence/video/upload/v1668446158/timeline-video/atom-vid.mp4" loop autoplay muted />-->
+      </div>
+    </div>
     {/if}
   </div>
 
@@ -436,105 +450,6 @@
   </div>
 </div>
 
-
-<!--{#if (!mobileVersion && !altVersion) || (mobileVersion && altVersion)}
-<div class="timeline-page-content" in:fade={{ duration: 200, delay: 700 }} out:fly={{ x: 500, duration: 750 }}>
-  <div class="timeline-container">
-    <p id="current-year">{changeYeartoBC(data.years[currentYearIndex])}</p>
-    <span class="cover" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
-    <div class="timeline-graph" on:wheel={scrollToChangeYear}>
-      {#each topPeople(currentYearIndex) as person, i (person.name)}
-        <div 
-          animate:flip|local={{ duration: 500, delay: 25 }}
-          style="left:{spaceOutGraph(i)[0]}px; top:{spaceOutGraph(i)[1]}px;" 
-          class="rank" 
-          id="rank-{i+1}"
-        >
-          <div out:fly={{ y: 100, duration: 300, delay: 100 }} in:fly={{ y: 100, duration: 500, delay: 50 }} class="person-data">
-            <div style="background-color:{changeBGColor(person, i)}" class="ranking-difference">
-              <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
-              <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
-            </div>
-            <a href="/people/{person.slug}" target="_blank">
-              <img src={defaultImg(person)} width="64" height="64" alt="image of {person.name}" />
-            </a>
-          </div>
-          <div out:fly={{ y: 100, duration: 10, delay: 100 }} class="grid grid-left" id="grid-{i+1}" style="height:{convertScore(person)}px">
-            <div class="face front"></div>
-            <div class="face back" style="background-color:{highlightNameMobile(person, i)}">
-              <p class="name-plate" id="{person.name}" style="color:{changeFontColor(person, i)}; background-color:{highlightName(person, i)}">{person.name}</p>
-            </div>
-            <div class="face right"></div>
-            <div class="face left"></div>
-            <div class="face top" style="height:{modifyEndHeights(convertScore(person))}%"></div>
-            <div class="face bottom" style="height:{modifyEndHeights(convertScore(person))}%; transform: rotateX(-90deg) translateZ({modifyBottomFace(convertScore(person))}px);"></div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-  <div class="control-buttons">
-    <button type="button" on:click={goBackInTime}>Reverse</button>
-    <button type="button" on:click={goForwardInTime}>Forward</button>
-    <input
-      id="formControlRange"
-      type="range"
-      min=0
-      max={data.years.length - 1}
-      bind:value={currentYearIndex}
-    />
-  </div>
-</div>
-{:else}
-<div class="timeline-page-content mobile" in:fade={{ duration: 200, delay: 700 }} out:fly={{ x: -500, duration: 750 }}>
-  <div class="timeline-container mobile">
-    <p id="current-year" class="mobile">{changeYeartoBC(data.years[currentYearIndex])}</p>
-    <span class="cover mobile" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
-    <div class="timeline-graph mobile" on:wheel={scrollToChangeYear}>
-      {#each topPeople(currentYearIndex) as person, i (person.name)}
-        <div 
-          animate:flip|local={{ duration: 500, delay: 25 }}
-          style="left:{spaceOutGraph(i)[0]}px; top:{spaceOutGraph(i)[1]}px;" 
-          class="rank mobile" 
-          id="rank-{i+1}"
-        >
-          <div class="person-data mobile" out:fade={{ duration: 10, delay: 25 }}>
-            <div style="background-color:{changeBGColor(person, i)}" class="ranking-difference mobile">
-              <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction mobile">{displayRankDifference(person, i)[0]}</span>
-              <span id="ranking-change-{person.name}" class="mobile">{displayRankDifference(person, i)[1]}</span>
-            </div>
-            <a href="/people/{person.slug}" target="_blank">
-              <img class="mobile" src={defaultImg(person)} width="64" height="64" alt="image of {person.name}" style="filter: brightness({brightenImage(person, i)}%)" />
-            </a>
-          </div>
-          <div out:flyScaleOut in:flyScaleIn class="grid grid-left mobile" id="grid-{i+1}" style="height:{convertScore(person)}px">
-            <div class="face front mobile"></div>
-            <div class="face back mobile" style="background-color:{highlightNameMobile(person, i)}">
-              <p class="name-plate mobile" id="{person.name}" style="color:{changeFontColor(person, i)}; background-color:{highlightName(person, i)}">{person.name}</p>
-            </div>
-            <div class="face right mobile"></div>
-            <div class="face left mobile"></div>
-            <div class="face top mobile" style="height:{modifyEndHeights(convertScore(person))}%"></div>
-            <div class="face bottom mobile" style="height:{modifyEndHeights(convertScore(person))}%; transform: rotateX(-90deg) translateZ({modifyBottomFace(convertScore(person))}px);"></div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-  <div class="control-buttons mobile">
-    <button class="mobile" type="button" on:click={goBackInTime}>Reverse</button>
-    <button class="mobile" type="button" on:click={goForwardInTime}>Forward</button>
-    <input
-      id="formControlRange"
-      type="range"
-      min=0
-      max={data.years.length - 1}
-      bind:value={currentYearIndex}
-    />
-  </div> 
-</div>
-{/if}-->
-
 <style>
 .timeline-graph-video {
   height: 100%;
@@ -548,6 +463,51 @@
   position: relative;
   gap: 1.5rem;
   padding: 2rem;
+}
+
+.image-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+video {
+  width: 50%;
+  height: 50%;
+}
+
+.speakers {
+  animation: 1s linear bumpSpeakers infinite;
+  animation-delay: 5s;
+}
+
+@keyframes bumpSpeakers {
+  0% { transform: scale(1) }
+  50% { transform: scale(1.1) }
+  100% { transform: scale(1) }
+}
+
+.outer-thermo {
+  position: absolute;
+  height: 26rem;
+  width: 0.3rem;
+  z-index: 2;
+  right: 15.1rem;
+  transform: rotate(342deg);
+  top: 4.75rem;
+}
+
+.inner-thermo {
+  background-color: #bb8e62;
+  animation: 2s linear raiseTemp infinite;
+}
+
+@keyframes raiseTemp {
+  0% { height: 100% }
+  50% { height: 0% }
+  100% { height: 100% }
 }
 
 :root {
