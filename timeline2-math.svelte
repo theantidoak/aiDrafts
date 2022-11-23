@@ -10,11 +10,7 @@
   let mobileVersion = screenWidth > 1024 ? false : true;
   let altVersion = false;
   let forwardInTime;
-  let backCount = false;
-  let forwardCount = false;
-  let scaleUp;
-  let increaseGap;
-
+  
   document.documentElement.style.overflowX = "hidden";
 
   function screenSizeOutput(people) {
@@ -45,143 +41,6 @@
     return people.slice(0, 10);
   }
 
-  const peopleWithImages = data.items
-    .filter(
-      (person) => {
-        if (person.name === "Victor Kolyvagin" || person.image !== "") {
-          return person;
-        }
-      }
-    );
-    
-
-  function allPeople() {
-    const people = peopleWithImages;
-    const spinCover = setInterval(function() {
-      spin += 4;
-      console.log(people.length);
-      if (spin === (people.length / 2.5) * 4) {
-        clearInterval(spinCover)
-      }
-    }, 250);
-
-    return people;
-  }
-
-  $: if (backCount && currentYearIndex === 0) {
-    forwardCount = true;
-    backCount = false;
-  }
-
-  $: if (!forwardCount && currentYearIndex === data.years.length - 1) {
-    spin = (data.years.length - 1) * 8;
-  }
-
-  $: if (currentYearIndex === 3 || currentYearIndex === 4) {
-    scaleUp = 2;
-  } else {
-    scaleUp = 1;
-  }
-
-  $: if (currentYearIndex === 3 || currentYearIndex === 4) {
-    increaseGap = 4;
-  } else {
-    increaseGap = .5;
-  }
-
-  function changeImage(currentPerson) {
-    if (currentPerson.name === "Victor Kolyvagin") {
-      return "https://res.cloudinary.com/academicinfluence/image/upload/v1669123499/timeline-video/openAI-Math/Victor_Kolyvagin.png"
-    }
-    return currentPerson.image;
-  }
-
-
-  function thisYearPeople(currentYearIndex) {
-    const people2021 = topPeople(data.years.length - 1);
-    let people = peopleWithImages;
-    if (currentYearIndex === 2) {
-      people.forEach(
-        (person) => {
-          if (!people2021.map((pers) => pers.image).includes(person.image)) {
-            person.hide = true;
-          }
-        })
-    } else if (currentYearIndex === 3) {
-      people = people
-        .filter(
-          (person) => people2021.map((pers) => pers.image).includes(person.image)
-        )
-    } else if (currentYearIndex === 4) {
-      people = people2021;
-    } else {
-      people = [];
-    }
-
-    return people;
-  }
-
-  function fadeOut(node, params) {
-    if (params.cond !== true) return;
-    return {
-      delay: 100,
-      duration: 500,
-      css: (t, u) => `opacity: ${u}`
-    }
-  }
-
-  function scaleIn() {
-    return {
-      delay: 500,
-      duration: 500,
-      css: (t, u) => `scale: ${t}`
-    }
-  }
-
-  function hideImages(person) {
-    if (person.hide === true) {
-      return 0;
-    }
-
-    return 1;
-  }
-
-  function goToLastYear() {
-    currentYearIndex = data.years.length - 1;
-    backCount = true;
-  }
-
-  function countBack() {
-    const countingBack = setInterval(function() {
-      if (currentYearIndex === 1){
-        clearInterval(countingBack)
-      }
-      currentYearIndex -= 1;
-    }, 50)
-  }
-
-  function playTimeline() {
-    const interval = setInterval(function() {
-      currentYearIndex += 1;
-      spin += 16;
-      if (currentYearIndex === data.years.length - 1) {
-        clearInterval(interval);
-      }
-    }, 2000)
-  }
-
-  function controlSpeed(currentYearIndex) {
-    if (forwardCount === true) {
-      return "transform linear 2.25s";
-    }
-
-    if (backCount === true && currentYearIndex) {
-      return "transform linear 0s";
-    } 
-    
-    return "transform linear .5s";
-  }
-
   function topPeople(index) {
     let people = data.items
       .filter(
@@ -192,6 +51,7 @@
         score: person.years[index - person.skip],
       }));
     people.sort((a, b) => b.score - a.score);
+    
 
     return screenSizeOutput(people);
   }
@@ -247,19 +107,7 @@
     return noImagePeople.slice(0, 20);
   };
 
-  const image0 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668769997/timeline-video/busts/white-egghead-male.png", ""];
-  const image1 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668769996/timeline-video/busts/black-egghead-male.png", ""];
-  const image2 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668769996/timeline-video/busts/male-mannequin-head.png", ""];
-  const image3 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668769996/timeline-video/busts/melancon-glass-head-bust.png", ""];
-  const image4 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668769996/timeline-video/busts/gold-head-statue.png", ""];
-  const image5 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668769996/timeline-video/busts/male-mannequin-white.png", ""];
-  const image6 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668769997/timeline-video/busts/male-mannequin-black.png", ""];
-  const image7 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668769999/timeline-video/busts/human-face-statue.png", ""];
-  const image8 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668770001/timeline-video/busts/silver-head-statue.png", ""];
-  const image9 = ["https://res.cloudinary.com/academicinfluence/image/upload/v1668770001/timeline-video/busts/sitting-man-statue.png", ""];
-  let altImages = [image0, image1, image2, image3, image4, image5, image6, image7, image8, image9];
-
-  function changeImages(currentPerson) {
+  function changeImage(currentPerson) {
     const noImagePeopleIndex = getNoImagePeople().map((person) => person.name).indexOf(currentPerson.name);
     const noImagePeopleImages = ["https://res.cloudinary.com/academicinfluence/image/upload/v1669114085/timeline-video/openAI-Math/Theodorus_of_Cyrene.png", 
       "https://res.cloudinary.com/academicinfluence/image/upload/v1669114086/timeline-video/openAI-Math/Meton_of_Athens.png", 
@@ -397,7 +245,7 @@
     const pageLoadIndex = forwardInTime;
     const previousIndex = getPreviousIndex(currentPerson, index);
     const difference = previousIndex - index;
-    if (previousIndex < 0 || pageLoadIndex === undefined || (forwardCount && currentYearIndex === 0)) {
+    if (previousIndex < 0 || pageLoadIndex === undefined) {
       return ["", "", "none", "rotate(0deg)", "rotate(0deg)"];
     }
 
@@ -414,10 +262,6 @@
 
   function changeBGColor(currentPerson, index) {
     const previousIndex = getPreviousIndex(currentPerson, index);
-    if (forwardCount && currentYearIndex === 0) {
-      return "#f6d267ef";
-    }
-
     if (index < previousIndex && previousIndex >= 0) {
       return "#0192c9";
     }
@@ -447,10 +291,6 @@
 
   function changeFontColor(currentPerson, index) {
     const previousIndex = getPreviousIndex(currentPerson, index);
-    if (forwardCount && currentYearIndex === 0) {
-      return "#000000";
-    }
-
     if ((index < previousIndex || index > previousIndex) && previousIndex >= 0) {
       return "#ffffff";
     }
@@ -513,48 +353,256 @@
     }
   }
 
+  let personFact;
+  let highlightedPerson;
+
   $: if (previousYearIndex < currentYearIndex) {
-    
+    spin += (currentYearIndex - previousYearIndex) * 32;
     forwardInTime = true;
     previousYearIndex = currentYearIndex;
+    personFact.parentElement.style = "block";
+    personFact.textContent = personFact !== undefined ? displayFact() : "";
+    highlightedPerson.src = highlightedPerson !== undefined ? displayImage() : "";
   } else if (previousYearIndex > currentYearIndex) {
-    spin -= (previousYearIndex - currentYearIndex) * 8;
+    spin -= (previousYearIndex - currentYearIndex) * 32;
     forwardInTime = false;
     previousYearIndex = currentYearIndex;
+    personFact.textContent = personFact !== undefined ? displayFact() : "";
+    highlightedPerson.src = highlightedPerson !== undefined ? displayImage() : "";
+  }
+
+  setTimeout(function() {
+    const interval = setInterval(function() {
+      if (currentYearIndex === data.years.length - 2) {
+        clearInterval(interval);
+      }
+      currentYearIndex += 1;
+    }, 3000)
+  }, 5000);
+
+  function displayImage() {
+    const year = data.years[currentYearIndex];
+    let person;
+    if (year >= -300 && year < 100) {
+      person = data.items.filter((person) => person.name === "Euclid");
+      return person[0].image;
+    } else if (year >= 100 && year < 700) {
+      person = data.items.filter((person) => person.name === "Ptolemy");
+      return person[0].image;
+    } else if (year >= 700 && year < 1000) {
+      person = data.items.filter((person) => person.name === "Brahmagupta");
+      return person[0].image;
+    } else if (year >= 1000 && year < 1500) {
+      person = data.items.filter((person) => person.name === "Fibonacci");
+      return person[0].image;
+    } else if (year >= 1500 && year < 1800) {
+      person = data.items.filter((person) => person.name === "Leonardo da Vinci");
+      return person[0].image;
+    } else if (year >= 1800 && year < 1850) {
+      person = data.items.filter((person) => person.name === "Carl Friedrich Gauss");
+      return person[0].image;
+    } else if (year >= 1850 && year < 1910) {
+      person = data.items.filter((person) => person.name === "Bernhard Riemann");
+      return person[0].image;
+    } else if (year >= 1910 && year < 1960) { 
+      person = data.items.filter((person) => person.name === "David Hilbert");
+      return person[0].image;
+    } else if (year >= 1960 && year < 1990) {
+      person = data.items.filter((person) => person.name === "John von Neumann");
+      return person[0].image;
+    } else if (year >= 1990 && year < 2006) {
+      person = data.items.filter((person) => person.name === "Grigori Perelman");
+      return person[0].image;
+    } else if (year >= 2006 && year < 2013) {
+      person = data.items.filter((person) => person.name === "Terence Tao");
+      return person[0].image;
+    } else if (year >= 2013 && year < 2022) {
+      person = data.items.filter((person) => person.name === "Edward Witten");
+      return person[0].image;
+    }
+  }
+
+  function displayFact() {
+    const year = data.years[currentYearIndex];
+    if (year >= -300 && year < 100) {
+      return `"Euclid was an ancient Greek mathematician active as a geometer and logician. Considered the "father of geometry", he is chiefly known for the Elements treatise, which established the foundations of geometry that largely dominated the field until the early 19th century."`
+    } else if (year >= 100 && year < 700) {
+      return `"Claudius Ptolemy was a mathematician, astronomer, astrologer, geographer, and music theorist, who wrote about a dozen scientific treatises, three of which were of importance to later Byzantine, Islamic, and Western European science: The astronomical treatise now known as the Almagest, the Geography, which is a thorough discussion on maps, and the astrological treatise."`
+    } else if (year >= 700 && year < 1000) {
+      return `"Brahmagupta was an Indian mathematician and astronomer. He is the author of two early works on mathematics and astronomy: the Brāhmasphuṭasiddhānta , a theoretical treatise, and the Khaṇḍakhādyaka , a more practical text."`
+    } else if (year >= 1000 && year < 1500) {
+      return `"Fibonacci , also known as Leonardo Bonacci, Leonardo of Pisa, or Leonardo Bigollo Pisano , was an Italian mathematician from the Republic of Pisa, considered to be 'the most talented Western mathematician of the Middle Ages'."`;
+    } else if (year >= 1500 && year < 1800) {
+      return `"Leonardo di ser Piero da Vinci was an Italian polymath of the High Renaissance who was active as a painter, draughtsman, engineer, scientist, theorist, sculptor, and architect. While his fame initially rested on his achievements as a painter, he also became known for his notebooks, in which he made drawings and notes on a variety of subjects, including anatomy, astronomy, botany, cartography, painting, and paleontology."`;
+    } else if (year >= 1800 && year < 1850) {
+      return `"Johann Carl Friedrich Gauss was a German mathematician and physicist who made significant contributions to many fields in mathematics and science. Sometimes referred to as the Princeps mathematicorum and 'the greatest mathematician since antiquity'"`;
+    } else if (year >= 1850 && year < 1910) {
+      return `"Georg Friedrich Bernhard Riemann was a German mathematician who made contributions to analysis, number theory, and differential geometry. Through his pioneering contributions to differential geometry, Riemann laid the foundations of the mathematics of general relativity. He is considered by many to be one of the greatest mathematicians of all time."`;
+    } else if (year >= 1910 && year < 1960) { 
+      return `"David Hilbert was a German mathematician and one of the most influential mathematicians of the 19th and early 20th centuries. Hilbert discovered and developed a broad range of fundamental ideas in many areas, including invariant theory, the calculus of variations, commutative algebra, algebraic number theory, the foundations of geometry, spectral theory of operators and its application to integral equations, mathematical physics, and the foundations of mathematics."`;
+    } else if (year >= 1960 && year < 1990) {
+      return `"John von Neumann was a Hungarian-American mathematician, physicist, computer scientist, engineer and polymath. He was regarded as having perhaps the widest coverage of any mathematician of his time and was said to have been 'the last representative of the great mathematicians who were equally at home in both pure and applied mathematics'."`;
+    } else if (year >= 1990 && year < 2006) {
+      return `"Grigori Yakovlevich Perelman is a Russian mathematician who is known for his contributions to the fields of geometric analysis, Riemannian geometry, and geometric topology. He is widely regarded as one of the greatest living mathematicians."`;
+    } else if (year >= 2006 && year < 2013) {
+      return `"Tao is arguably the greatest living mathematician, and has been called the greatest mathematician of his generation. Born in South Australia, Tao was a child prodigy, the youngest person ever to win a medal in the International Mathematical Olympiad—he was ten. He has since won the Field Medal, the “Nobel Prize” for mathematicians. Terence Tao holds the James and Carol Collins Chair in Mathematics at the University of California at Los Angeles (UCLA)."`;
+    } else if (year >= 2013 && year < 2022) {
+      return `"Edward Witten is an American mathematical and theoretical physicist. He is a Professor Emeritus in the School of Natural Sciences at the Institute for Advanced Study in Princeton. Witten is a researcher in string theory, quantum gravity, supersymmetric quantum field theories, and other areas of mathematical physics. Witten's work has also significantly impacted pure mathematics."`;
+    }
+  }
+
+  const scheme0 = ["white", "rgb(1, 146, 201)", ""];
+  const scheme1 = ["white", "rgb(231, 108, 38)", ""];
+  const scheme2 = ["white", "rgb(1, 117, 161)", ""];
+  const scheme3 = ["white", "rgb(255, 133, 20)", ""];
+  const scheme4 = ["white", "deeppink", ""];
+  const scheme5 = ["white", "rgb(247, 93, 51)", ""];
+  const scheme6 = ["black", "orchid", ""];
+  const scheme7 = ["white", "rgb(208, 97, 34)", ""];
+  const scheme8 = ["white", "rgb(1, 73, 101)", ""];
+  const scheme9 = ["black", "blue", ""];
+  let colorSchemes = [scheme0, scheme1, scheme2, scheme3, scheme4, scheme5, scheme6, scheme7, scheme8, scheme9];
+
+  function changeBGColor3(currentPerson, index) {
+    let colors;
+    const previousIndex = getPreviousIndex(currentPerson, index);
+    const previousPeople = forwardInTime 
+      ? topPeople(currentYearIndex - 1).map((person) => person.name)
+      : topPeople(currentYearIndex + 1).map((person) => person.name);
+    const peopleToRemove = previousPeople.filter((person) => topPeople(currentYearIndex).map((person) => person.name).indexOf(person) === -1);
+    colorSchemes.forEach((scheme) => {
+      scheme[2] = peopleToRemove.indexOf(scheme[2]) !== -1 ? "" : scheme[2];
+    });
+    const checkList = colorSchemes.some((scheme) => scheme[2] === currentPerson.name);
+
+    if (previousIndex !== -1 && !checkList) {
+      colors = colorSchemes[index];
+      colorSchemes[index][2] = currentPerson.name;
+    } else if (previousIndex === -1) {
+      const availableColors = colorSchemes.filter((scheme) => scheme[2] === "");
+      const existingPeople = colorSchemes.filter((scheme) => scheme[2] !== "").map((scheme) => scheme[2]);
+      const newPeople = topPeople(currentYearIndex)
+        .filter((person, i) => getPreviousIndex(person, i) === -1)
+        .filter((person) => existingPeople.indexOf(person.name) === -1);
+      const newIndex = newPeople.map((person) => person.name).indexOf(currentPerson.name);
+      if (newIndex >= availableColors.length || availableColors.length === 0) {
+        colors = colorSchemes[index];
+      } else {
+        colors = newIndex !== -1 ? availableColors[newIndex] : availableColors[newIndex + 1];
+      }
+      colorSchemes.forEach((scheme) => {
+        scheme[2] = scheme[1] === colors[1] ? currentPerson.name : scheme[2];
+      });
+    } else {
+      colors = colorSchemes.filter((scheme) => scheme[2] === currentPerson.name);
+    }
+
+    return colors[1];
+  }
+
+  function changeFontColor2(currentPerson, index) {
+    /*const previousIndex = getPreviousIndex(currentPerson, index);
+
+    if (previousIndex === -1) {
+      return "rgb(255, 133, 20)";
+    }
+
+    if (index < previousIndex && previousIndex >= 0) {
+      return "#0192c9";
+    }
+
+    if (index > previousIndex && previousIndex >= 0) {
+      return "#003a50";
+    }*/
+
+    return colorSchemes.filter((scheme) => scheme[2] === currentPerson.name)[0][1];
+  }
+
+  function convertScore2(person) {
+    const influentialPeople = topPeople(currentYearIndex);
+    const originalScale = [influentialPeople[influentialPeople.length - 1].score, influentialPeople[0].score];
+    let graphScale;
+    if (influentialPeople[influentialPeople.length - 1].score > 250) {
+      graphScale = [250, 925];
+    } else {
+      graphScale = [influentialPeople[influentialPeople.length - 1].score, 925];
+    }
+
+    return (person.score - originalScale[0]) * (graphScale[1] - graphScale[0]) / (originalScale[1] - originalScale[0]) + graphScale[0];
   }
 
 </script>
+
 <div class="toggle-display">
   <p class="change-display">See other version: </p>
   <input type="checkbox" id="switch" on:click={toggleVersions} />
   <label for="switch"></label>
 </div>
 
+<div class="timeline-page-content">
+  <div class="timeline-container">
+    <p id="current-year-2">{changeYeartoBC(data.years[currentYearIndex])}</p>
+    <span class="cover-2" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
+    <div style="display: none;" class="person-fact-2">
+      <p style="margin: 0;" bind:this={personFact}></p>
+      <img style="position: absolute; height:5rem; width: 5rem; right: 0rem; bottom: 0rem; opacity: .75" bind:this={highlightedPerson} /> 
+      <p style="font-size:.8rem; position: absolute; top: -1.25rem; margin:0; color: black; right:0;">Source: Wikipedia</p>
+    </div>
+    <div class="timeline-graph-2" on:wheel={scrollToChangeYear}>
+      {#each topPeople(currentYearIndex) as person, i (person.name)}
+        <a out:fly={{ x: -300, duration: 1800, delay: 100 }} in:fly={{ y: 100 * (11 - (i+1)), duration: 2600, delay: 50 }} animate:flip|local={{ duration: 2600, delay: 25 }} class="rank-2" href="/people/{person.slug}" target="_blank">
+          <img src={changeImage(person)} style="margin-right:.25rem; width:46px; height:46px" alt="image of {person.name}" />
+          <div class="grid-2" style="background-color:{changeBGColor3(person, i)}; width:{convertScore2(person)}px"></div>
+          <p class="name-plate-2" style="color:{changeFontColor2(person, i)};">{person.name}</p>
+          <!--<div style="color:{changeBGColor(person, i)}; min-width: 2rem;" class="ranking-difference-2">
+            <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
+            <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
+          </div>-->
+        </a>
+      {/each}
+    </div>
+  </div>
+  <div class="control-buttons">
+    <button type="button" on:click={goBackInTime}>Reverse</button>
+    <button type="button" on:click={goForwardInTime}>Forward</button>
+    <input
+      id="formControlRange"
+      type="range"
+      min=0
+      max={data.years.length - 1}
+      bind:value={currentYearIndex}
+    />
+  </div>
+</div>
+
+<!--<div class="toggle-display">
+  <p class="change-display">See other version: </p>
+  <input type="checkbox" id="switch" on:click={toggleVersions} />
+  <label for="switch"></label>
+</div>
+{#if (!mobileVersion && !altVersion) || (mobileVersion && altVersion)}
 <div class="timeline-page-content" in:fade={{ duration: 200, delay: 700 }} out:fly={{ x: 500, duration: 750 }}>
   <div class="timeline-container">
-    <span class="cover" style="-webkit-transition: {controlSpeed(currentYearIndex)}; transition: {controlSpeed(currentYearIndex)}; transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
-    {#if backCount === true && currentYearIndex !== 0}
-    <p out:scaleIn in:scaleIn id="current-year" style="transform: scale(3); top: 0; right: 0; bottom: 0; left: 0; width: fit-content; height: fit-content; margin: auto">{changeYeartoBC(data.years[currentYearIndex])}</p>
-    {:else if forwardCount}
-    <p in:scaleIn id="current-year">{changeYeartoBC(data.years[currentYearIndex])}</p>
-    <div in:fly={{ y: 500, duration: 500, delay: 1000 }} class="timeline-graph" on:wheel={scrollToChangeYear}>
+    <p id="current-year">{changeYeartoBC(data.years[currentYearIndex])}</p>
+    <span class="cover" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
+    <div class="timeline-graph" on:wheel={scrollToChangeYear}>
       {#each topPeople(currentYearIndex) as person, i (person.name)}
         <div 
-          animate:flip|local={{ duration: 1000, delay: 25 }}
+          animate:flip|local={{ duration: 500, delay: 25 }}
           style="left:{spaceOutGraph(i)[0]}px; top:{spaceOutGraph(i)[1]}px;" 
           class="rank" 
           id="rank-{i+1}"
         >
-          <div out:fly={{ y: 100, duration: 800, delay: 100 }} in:fly={{ y: 100, duration: 1000, delay: 50 }} class="person-data">
+          <div out:fly={{ y: 100, duration: 300, delay: 100 }} in:fly={{ y: 100, duration: 500, delay: 50 }} class="person-data">
             <div style="background-color:{changeBGColor(person, i)}" class="ranking-difference">
               <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
               <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
             </div>
             <a href="/people/{person.slug}" target="_blank">
-              <img src={changeImages(person)} style="background-color: white" width="64" height="64" alt="image of {person.name}" />
+              <img src={changeImage(person)} width="64" height="64" alt="image of {person.name}" />
             </a>
           </div>
-          <div out:fly={{ y: 100, duration: 510, delay: 100 }} class="grid grid-left" id="grid-{i+1}" style="height:{convertScore(person)}px">
+          <div out:fly={{ y: 100, duration: 10, delay: 100 }} class="grid grid-left" id="grid-{i+1}" style="height:{convertScore(person)}px">
             <div class="face front"></div>
             <div class="face back" style="background-color:{highlightNameMobile(person, i)}">
               <p class="name-plate" id="{person.name}" style="color:{changeFontColor(person, i)}; background-color:{highlightName(person, i)}">{person.name}</p>
@@ -567,21 +615,7 @@
         </div>
       {/each}
     </div>
-    {:else if currentYearIndex === 1}
-    <div style="gap: {increaseGap}rem" class="timeline-graph-video" on:wheel={scrollToChangeYear}>
-      {#each allPeople() as person, i (person.name)}
-        <img src={changeImage(person)} style="background-color: white" width="42" height="42" alt=" " in:fly={{ x: -1000, duration: 500, delay: i*100 }} />
-      {/each}
-    </div>
-    {:else if currentYearIndex !== 0}
-    <div style="gap: {increaseGap}rem" class="timeline-graph-video" on:wheel={scrollToChangeYear}>
-      {#each thisYearPeople(currentYearIndex) as person, i (person.name)}
-        <img src={changeImage(person)} width="42" height="42" alt=" " in:fadeOut={{cond: person.hide}} out:fade={{ duration: 500 }} animate:flip={{ duration: 750 }} style="background-color: white; transform: scale({scaleUp}); transition: transform 1.5s linear; opacity:{hideImages(person)}" />
-      {/each}
-    </div>
-    {/if}
   </div>
-
   <div class="control-buttons">
     <button type="button" on:click={goBackInTime}>Reverse</button>
     <button type="button" on:click={goForwardInTime}>Forward</button>
@@ -593,74 +627,58 @@
       bind:value={currentYearIndex}
     />
   </div>
-  <div style="position: absolute; left: 1rem; top: 60rem; display:flex; flex-direction:column">
-    <button on:click={goToLastYear}>Last Year</button>
-    <button on:click={countBack}>Count back</button>
-    <button on:click={playTimeline}>Play</button>
-  </div>
 </div>
+{:else}
+<div class="timeline-page-content mobile" in:fade={{ duration: 200, delay: 700 }} out:fly={{ x: -500, duration: 750 }}>
+  <div class="timeline-container mobile">
+    <p id="current-year" class="mobile">{changeYeartoBC(data.years[currentYearIndex])}</p>
+    <span class="cover mobile" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
+    <div class="timeline-graph mobile" on:wheel={scrollToChangeYear}>
+      {#each topPeople(currentYearIndex) as person, i (person.name)}
+        <div 
+          animate:flip|local={{ duration: 500, delay: 25 }}
+          style="left:{spaceOutGraph(i)[0]}px; top:{spaceOutGraph(i)[1]}px;" 
+          class="rank mobile" 
+          id="rank-{i+1}"
+        >
+          <div class="person-data mobile" out:fade={{ duration: 10, delay: 25 }}>
+            <div style="background-color:{changeBGColor(person, i)}" class="ranking-difference mobile">
+              <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction mobile">{displayRankDifference(person, i)[0]}</span>
+              <span id="ranking-change-{person.name}" class="mobile">{displayRankDifference(person, i)[1]}</span>
+            </div>
+            <a href="/people/{person.slug}" target="_blank">
+              <img class="mobile" src={changeImage(person)} width="64" height="64" alt="image of {person.name}" style="filter: brightness({brightenImage(person, i)}%)" />
+            </a>
+          </div>
+          <div out:flyScaleOut in:flyScaleIn class="grid grid-left mobile" id="grid-{i+1}" style="height:{convertScore(person)}px">
+            <div class="face front mobile"></div>
+            <div class="face back mobile" style="background-color:{highlightNameMobile(person, i)}">
+              <p class="name-plate mobile" id="{person.name}" style="color:{changeFontColor(person, i)}; background-color:{highlightName(person, i)}">{person.name}</p>
+            </div>
+            <div class="face right mobile"></div>
+            <div class="face left mobile"></div>
+            <div class="face top mobile" style="height:{modifyEndHeights(convertScore(person))}%"></div>
+            <div class="face bottom mobile" style="height:{modifyEndHeights(convertScore(person))}%; transform: rotateX(-90deg) translateZ({modifyBottomFace(convertScore(person))}px);"></div>
+          </div>
+        </div>
+      {/each}
+    </div>
+  </div>
+  <div class="control-buttons mobile">
+    <button class="mobile" type="button" on:click={goBackInTime}>Reverse</button>
+    <button class="mobile" type="button" on:click={goForwardInTime}>Forward</button>
+    <input
+      id="formControlRange"
+      type="range"
+      min=0
+      max={data.years.length - 1}
+      bind:value={currentYearIndex}
+    />
+  </div> 
+</div>
+{/if}-->
 
 <style>
-.timeline-graph-video {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  margin: 0 auto;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  z-index: 5;
-  position: relative;
-  gap: .4rem;
-  padding: .15rem;
-}
-
-/*
-.image-container {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-video {
-  width: 50%;
-  height: 50%;
-}
-
-.speakers {
-  animation: 1s linear bumpSpeakers infinite;
-  animation-delay: 5s;
-}
-
-@keyframes bumpSpeakers {
-  0% { transform: scale(1) }
-  50% { transform: scale(1.1) }
-  100% { transform: scale(1) }
-}
-
-.outer-thermo {
-  position: absolute;
-  height: 26rem;
-  width: 0.3rem;
-  z-index: 2;
-  right: 15.1rem;
-  transform: rotate(342deg);
-  top: 4.75rem;
-}
-
-.inner-thermo {
-  background-color: #bb8e62;
-  animation: 2s linear raiseTemp infinite;
-}
-
-@keyframes raiseTemp {
-  0% { height: 100% }
-  50% { height: 0% }
-  100% { height: 100% }
-}*/
-
 :root {
   --start-translate: translateY(200px);
   --end-translate: translateY(0px);
@@ -743,13 +761,90 @@ input[type=checkbox] + label:active:after {
   font-size: 2.5rem;
   position: absolute;
   z-index: 1;
-  top: 1rem;
-  right: 1rem;
+  top: 7rem;
+  right: 0rem;
   background-color: #0175a1;
   border-radius: 6px;
   padding: 1rem .75rem;
   font-weight: 600;
   box-shadow: 0 5px 15px rgba(1, 73, 101, .9);
+}
+
+#current-year-2 {
+  color: white;
+  font-size: 2.5rem;
+  position: absolute;
+  z-index: 1;
+  margin: 0;
+  top: 14rem;
+  left: 57.5rem;
+  background-color: #0175a1;
+  border-radius: 6px;
+  padding: 1rem .75rem;
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(1, 73, 101, .9);
+}
+
+.cover-2 {
+  position: absolute;
+  background: url(https://res.cloudinary.com/academicinfluence/image/upload/v1667925562/getting-started/square_timeline.jpg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border-radius: 50%;
+  filter: brightness(1);
+  transition: transform linear 3s;
+  width: 13rem;
+  height: 13rem;
+  right: 1rem;
+  top: 0rem;
+  z-index: 0;
+}
+
+.timeline-graph-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  position: relative;
+  top: 0rem;
+  width: 100%;
+  z-index: 2;
+}
+
+.person-fact-2 {
+  position: absolute;
+  right: 1rem;
+  bottom: 0rem;
+  padding: .75rem;
+  height: 20rem;
+  width: 29rem;
+  background-color: #0175a1;
+  color: white;
+  z-index: 1;
+}
+
+.rank-2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 46px;
+}
+
+.grid-2 {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  transition: width 2s ease;
+  border-radius: 8px;
+}
+
+.name-plate-2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: initial;
+  padding: 0 .5rem;
+  background-color: white;
 }
 
 .cover {
@@ -760,15 +855,17 @@ input[type=checkbox] + label:active:after {
   background-size: cover;
   border-radius: 50%;
   filter: brightness(1);
+  transition: transform linear .5s;
   will-change: transform;
   width: 126%;
   height: 82rem;
-  right: -13%;
+  right: -14%;
   top: 0;
   bottom: 0;
   margin: auto 0;
   z-index: 0;
   
+  -webkit-transition: transform linear .5s;
   -webkit-will-change: transform;
   --moz-backface-visibility: hidden;
   -ms-backface-visibility: hidden;
