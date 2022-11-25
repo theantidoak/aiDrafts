@@ -1,6 +1,7 @@
 <script>
   import { fly, fade } from 'svelte/transition';
   import { flip } from 'svelte/animate';
+  import { physicsImages, mathImages } from './person-timeline-images';
   export let data;
   let spin = 0;
   let currentYearIndex = 0;
@@ -10,6 +11,8 @@
   let mobileVersion = screenWidth > 1024 ? false : true;
   let altVersion = false;
   let forwardInTime;
+  let personFact;
+  let highlightedPerson;
   
   document.documentElement.style.overflowX = "hidden";
 
@@ -52,7 +55,6 @@
       }));
     people.sort((a, b) => b.score - a.score);
     
-
     return screenSizeOutput(people);
   }
 
@@ -91,108 +93,6 @@
     currentYearIndex -= 1;
   }
 
-  function getNoImagePeople() {
-    let noImagePeople = [];
-    for (let i = 0; i < data.items.length; i++) {
-      const thisYearPeople = topPeople(i).filter((person) => person.image === "");
-      if (thisYearPeople.length !== 0) {
-        for (let j = 0; j < thisYearPeople.length; j++)
-        if (noImagePeople.map((person) => person.name).indexOf(thisYearPeople[j].name) === -1) {
-          noImagePeople.push(thisYearPeople[j]);
-        }
-        
-      }
-      
-    }
-    return noImagePeople.slice(0, 20);
-  };
-
-  function changeImage(currentPerson) {
-    const noImagePeopleIndex = getNoImagePeople().map((person) => person.name).indexOf(currentPerson.name);
-    const noImagePeopleImages = ["https://res.cloudinary.com/academicinfluence/image/upload/v1669114085/timeline-video/openAI-Math/Theodorus_of_Cyrene.png", 
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114086/timeline-video/openAI-Math/Meton_of_Athens.png", 
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114088/timeline-video/openAI-Math/Oenopides.png", 
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114090/timeline-video/openAI-Math/Ion_of_Chios.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114093/timeline-video/openAI-Math/Eudoxus_of_Cnidus.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114093/timeline-video/openAI-Math/Theaetetus.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114095/timeline-video/openAI-Math/Menaechmus.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114097/timeline-video/openAI-Math/Autolycus_of_Pitane.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114098/timeline-video/openAI-Math/Zhang_Cang.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114101/timeline-video/openAI-Math/Zenodorus.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114105/timeline-video/openAI-Math/Seleucus_of_Seleucia.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114107/timeline-video/openAI-Math/Ctesibius.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114108/timeline-video/openAI-Math/Pingala.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114110/timeline-video/openAI-Math/Hypsicles.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114112/timeline-video/openAI-Math/Theodosius_of_Bithynia.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114114/timeline-video/openAI-Math/Perseus.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114116/timeline-video/openAI-Math/Philonides_of_Laodicea.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114118/timeline-video/openAI-Math/Attalus_of_Rhodes.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114120/timeline-video/openAI-Math/Liu_Xin.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114166/timeline-video/openAI-Math/Cleomedes.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114170/timeline-video/openAI-Math/Jing_Fang.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114173/timeline-video/openAI-Math/Wang_Chong.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114178/timeline-video/openAI-Math/Theon_of_Smyrna.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114181/timeline-video/openAI-Math/Rabbi_Nehemiah.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114184/timeline-video/openAI-Math/Liu_Hui.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114185/timeline-video/openAI-Math/Xu_Yue.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114188/timeline-video/openAI-Math/Wang_Fan.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114192/timeline-video/openAI-Math/Theon_of_Alexandria.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114211/timeline-video/openAI-Math/Pandrosion.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114216/timeline-video/openAI-Math/Sporus_of_Nicaea.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114221/timeline-video/openAI-Math/Proclus.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114224/timeline-video/openAI-Math/Domninus_of_Larissa.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114226/timeline-video/openAI-Math/Asclepius_of_Tralles.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114298/timeline-video/openAI-Math/John_Philoponus.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114311/timeline-video/openAI-Math/Anthemius_of_Tralles.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114312/timeline-video/openAI-Math/Eutocius_of_Ascalon.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114316/timeline-video/openAI-Math/Stephanus_of_Alexandria.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114318/timeline-video/openAI-Math/Wang_Xiaotong.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114320/timeline-video/openAI-Math/Li_Chunfeng.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114322/timeline-video/openAI-Math/Lalla.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114331/timeline-video/openAI-Math/Al-Mahani.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114335/timeline-video/openAI-Math/Sahl_ibn_Bishr.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114336/timeline-video/openAI-Math/Abu_Kamil.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114338/timeline-video/openAI-Math/Abd_al-Rahman_al-Sufi.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114340/timeline-video/openAI-Math/Al-Sijzi.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114346/timeline-video/openAI-Math/Robert_of_Chester.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114348/timeline-video/openAI-Math/Al-Khazini.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114349/timeline-video/openAI-Math/Abraham_bar_Hiyya.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114351/timeline-video/openAI-Math/Madhava_of_Sangamagrama.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114353/timeline-video/openAI-Math/Gersonides.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114355/timeline-video/openAI-Math/Giovanni_di_Casali.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114358/timeline-video/openAI-Math/Albert_of_Saxony.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114361/timeline-video/openAI-Math/Nilakantha_Somayaji.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114363/timeline-video/openAI-Math/Scipione_del_Ferro.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114365/timeline-video/openAI-Math/Lodovico_Ferrari.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669123499/timeline-video/openAI-Math/Victor_Kolyvagin.png"];
-
-    const specialCharacters = ["https://res.cloudinary.com/academicinfluence/image/upload/v1669114171/timeline-video/openAI-Math/Abd_al-Hami%CC%84d_ibn_Turk.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114315/timeline-video/openAI-Math/Vara%CC%84hamihira.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114323/timeline-video/openAI-Math/Mu%CC%84sa%CC%84_ibn_Sha%CC%84kir.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669120648/timeline-video/openAI-Math/Maha%CC%84vi%CC%84ra.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114329/timeline-video/openAI-Math/Al-Abba%CC%84s_ibn_Said_al-Jawhari%CC%84.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114333/timeline-video/openAI-Math/Tha%CC%84bit_ibn_Qurra.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114345/timeline-video/openAI-Math/Bha%CC%84skara_II.png",
-      "https://res.cloudinary.com/academicinfluence/image/upload/v1669114360/timeline-video/openAI-Math/Ibn_al-Banna_al-Marrakushi.png",
-    ];
-
-    const specialCharacterPeople = ["'Abd al-Hamīd ibn Turk", "Varāhamihira", "Mūsā ibn Shākir", "Mahāvīra ", "Al-Abbās ibn Said al-Jawharī", "Thābit ibn Qurra", "Bhāskara II", "Ibn al-Banna' al-Marrakushi"];
-    if (currentPerson.image !== "") {
-      return currentPerson.image;
-    }
-
-    if (specialCharacterPeople.indexOf(currentPerson.name) !== -1) {
-      return specialCharacters[specialCharacterPeople.indexOf(currentPerson.name)]
-    }
-
-    const person = currentPerson.name.charAt(currentPerson.name.length - 1) === " " ? currentPerson.name.slice(0, -1) : currentPerson.name;
-    const imageURL = noImagePeopleImages.filter(
-      (image) => image.slice(image.lastIndexOf('.') - person.length, image.indexOf('.png')).replaceAll('_', ' ') == person
-    )
-
-    return imageURL;
-  }
-
   function convertScore(person) {
     let graphScale = [124];
     const influentialPeople = topPeople(currentYearIndex);
@@ -222,6 +122,32 @@
     return newBarHeight - 50;
   }
 
+  function defaultImg(currentPerson) {
+    let noImagePeople;
+    const pageType = document.querySelector(".article-page__article h1").textContent;
+
+    if (currentPerson.image !== "") {
+      return currentPerson.image;
+    }
+
+    switch (pageType) {
+      case "Influential Mathematicians Timeline":
+        if (mathImages[2].indexOf(currentPerson.name) !== -1) {
+          return mathImages[1][mathImages[2].indexOf(currentPerson.name)]
+        }
+        noImagePeople = mathImages[0];
+        break;
+      case "Interactive Tool: Influential Physicists Timeline":
+        noImagePeople = physicsImages[0];
+        break;
+    }
+
+    const person = currentPerson.name.charAt(currentPerson.name.length - 1) === " " ? currentPerson.name.slice(0, -1) : currentPerson.name;
+    return noImagePeople.filter(
+      (image) => image.slice(image.lastIndexOf('.') - person.length, image.indexOf('.png')).replaceAll('_', ' ') == person
+    )
+  }
+
   function changeYeartoBC(year) {
     return year < 0 ? `${-year} BC` : `${year} AD`;
   }
@@ -238,26 +164,6 @@
     }
     
     return previousIndex;
-  }
-
-  function displayRankDifference(currentPerson, index) {
-    const upArrow = "\u25B2";
-    const pageLoadIndex = forwardInTime;
-    const previousIndex = getPreviousIndex(currentPerson, index);
-    const difference = previousIndex - index;
-    if (previousIndex < 0 || pageLoadIndex === undefined) {
-      return ["", "", "none", "rotate(0deg)", "rotate(0deg)"];
-    }
-
-    if (difference < 0) {
-      return [upArrow, difference * -1, "inline-block", "rotate(90deg)", "rotate(180deg)"];
-    }
-    
-    if (difference > 0) {
-      return [upArrow, difference, "inline-block", "rotate(90deg)", "rotate(0deg)"];
-    }
-
-    return ["", "", "none", "rotate(0deg)", "rotate(0deg)"];
   }
 
   function changeBGColor(currentPerson, index) {
@@ -353,9 +259,6 @@
     }
   }
 
-  let personFact;
-  let highlightedPerson;
-
   $: if (previousYearIndex < currentYearIndex) {
     spin += (currentYearIndex - previousYearIndex) * 32;
     forwardInTime = true;
@@ -370,15 +273,6 @@
     personFact.textContent = personFact !== undefined ? displayFact() : "";
     highlightedPerson.src = highlightedPerson !== undefined ? displayImage() : "";
   }
-
-  setTimeout(function() {
-    const interval = setInterval(function() {
-      if (currentYearIndex === data.years.length - 2) {
-        clearInterval(interval);
-      }
-      currentYearIndex += 1;
-    }, 3000)
-  }, 5000);
 
   function displayImage() {
     const year = data.years[currentYearIndex];
@@ -501,20 +395,6 @@
   }
 
   function changeFontColor2(currentPerson, index) {
-    /*const previousIndex = getPreviousIndex(currentPerson, index);
-
-    if (previousIndex === -1) {
-      return "rgb(255, 133, 20)";
-    }
-
-    if (index < previousIndex && previousIndex >= 0) {
-      return "#0192c9";
-    }
-
-    if (index > previousIndex && previousIndex >= 0) {
-      return "#003a50";
-    }*/
-
     return colorSchemes.filter((scheme) => scheme[2] === currentPerson.name)[0][1];
   }
 
@@ -530,6 +410,15 @@
 
     return (person.score - originalScale[0]) * (graphScale[1] - graphScale[0]) / (originalScale[1] - originalScale[0]) + graphScale[0];
   }
+
+  /*setTimeout(function() {
+    const interval = setInterval(function() {
+      if (currentYearIndex === data.years.length - 2) {
+        clearInterval(interval);
+      }
+      currentYearIndex += 1;
+    }, 3000)
+  }, 5000);*/
 
 </script>
 
@@ -551,7 +440,7 @@
     <div class="timeline-graph-2" on:wheel={scrollToChangeYear}>
       {#each topPeople(currentYearIndex) as person, i (person.name)}
         <a out:fly={{ x: -300, duration: 1800, delay: 100 }} in:fly={{ y: 100 * (11 - (i+1)), duration: 2600, delay: 50 }} animate:flip|local={{ duration: 2600, delay: 25 }} class="rank-2" href="/people/{person.slug}" target="_blank">
-          <img src={changeImage(person)} style="margin-right:.25rem; width:46px; height:46px" alt="image of {person.name}" />
+          <img src={defaultImg(person)} style="margin-right:.25rem; width:46px; height:46px" alt="image of {person.name}" />
           <div class="grid-2" style="background-color:{changeBGColor3(person, i)}; width:{convertScore2(person)}px"></div>
           <p class="name-plate-2" style="color:{changeFontColor2(person, i)};">{person.name}</p>
           <!--<div style="color:{changeBGColor(person, i)}; min-width: 2rem;" class="ranking-difference-2">
@@ -580,55 +469,7 @@
   <input type="checkbox" id="switch" on:click={toggleVersions} />
   <label for="switch"></label>
 </div>
-{#if (!mobileVersion && !altVersion) || (mobileVersion && altVersion)}
-<div class="timeline-page-content" in:fade={{ duration: 200, delay: 700 }} out:fly={{ x: 500, duration: 750 }}>
-  <div class="timeline-container">
-    <p id="current-year">{changeYeartoBC(data.years[currentYearIndex])}</p>
-    <span class="cover" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
-    <div class="timeline-graph" on:wheel={scrollToChangeYear}>
-      {#each topPeople(currentYearIndex) as person, i (person.name)}
-        <div 
-          animate:flip|local={{ duration: 500, delay: 25 }}
-          style="left:{spaceOutGraph(i)[0]}px; top:{spaceOutGraph(i)[1]}px;" 
-          class="rank" 
-          id="rank-{i+1}"
-        >
-          <div out:fly={{ y: 100, duration: 300, delay: 100 }} in:fly={{ y: 100, duration: 500, delay: 50 }} class="person-data">
-            <div style="background-color:{changeBGColor(person, i)}" class="ranking-difference">
-              <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
-              <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
-            </div>
-            <a href="/people/{person.slug}" target="_blank">
-              <img src={changeImage(person)} width="64" height="64" alt="image of {person.name}" />
-            </a>
-          </div>
-          <div out:fly={{ y: 100, duration: 10, delay: 100 }} class="grid grid-left" id="grid-{i+1}" style="height:{convertScore(person)}px">
-            <div class="face front"></div>
-            <div class="face back" style="background-color:{highlightNameMobile(person, i)}">
-              <p class="name-plate" id="{person.name}" style="color:{changeFontColor(person, i)}; background-color:{highlightName(person, i)}">{person.name}</p>
-            </div>
-            <div class="face right"></div>
-            <div class="face left"></div>
-            <div class="face top" style="height:{modifyEndHeights(convertScore(person))}%"></div>
-            <div class="face bottom" style="height:{modifyEndHeights(convertScore(person))}%; transform: rotateX(-90deg) translateZ({modifyBottomFace(convertScore(person))}px);"></div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-  <div class="control-buttons">
-    <button type="button" on:click={goBackInTime}>Reverse</button>
-    <button type="button" on:click={goForwardInTime}>Forward</button>
-    <input
-      id="formControlRange"
-      type="range"
-      min=0
-      max={data.years.length - 1}
-      bind:value={currentYearIndex}
-    />
-  </div>
-</div>
-{:else}
+
 <div class="timeline-page-content mobile" in:fade={{ duration: 200, delay: 700 }} out:fly={{ x: -500, duration: 750 }}>
   <div class="timeline-container mobile">
     <p id="current-year" class="mobile">{changeYeartoBC(data.years[currentYearIndex])}</p>
@@ -647,7 +488,7 @@
               <span id="ranking-change-{person.name}" class="mobile">{displayRankDifference(person, i)[1]}</span>
             </div>
             <a href="/people/{person.slug}" target="_blank">
-              <img class="mobile" src={changeImage(person)} width="64" height="64" alt="image of {person.name}" style="filter: brightness({brightenImage(person, i)}%)" />
+              <img class="mobile" src={defaultImg(person)} width="64" height="64" alt="image of {person.name}" style="filter: brightness({brightenImage(person, i)}%)" />
             </a>
           </div>
           <div out:flyScaleOut in:flyScaleIn class="grid grid-left mobile" id="grid-{i+1}" style="height:{convertScore(person)}px">

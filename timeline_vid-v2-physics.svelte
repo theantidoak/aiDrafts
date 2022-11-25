@@ -1,6 +1,7 @@
 <script>
   import { fly, fade } from 'svelte/transition';
   import { flip } from 'svelte/animate';
+  import { physicsImages, mathImages } from './person-timeline-images';
   export let data;
   let spin = 0;
   let currentYearIndex = 0;
@@ -10,6 +11,8 @@
   let mobileVersion = screenWidth > 1024 ? false : true;
   let altVersion = false;
   let forwardInTime;
+  let personFact;
+  let highlightedPerson;
   
   document.documentElement.style.overflowX = "hidden";
 
@@ -52,7 +55,6 @@
       }));
     people.sort((a, b) => b.score - a.score);
     
-
     return screenSizeOutput(people);
   }
 
@@ -91,17 +93,6 @@
     currentYearIndex -= 1;
   }
 
-  function defaultImg(person) {
-    if (person.name === "John Philoponus") {
-      return "https://res.cloudinary.com/academicinfluence/image/upload/v1668180117/getting-started/john-philoponus-4.png";
-    }
-    if (person.image === "") {
-      return "https://res.cloudinary.com/academicinfluence/image/upload/v1667505750/getting-started/Screenshot_2022-11-03_at_21.01.57.png"
-    }
-
-    return person.image;
-  }
-
   function convertScore(person) {
     let graphScale = [124];
     const influentialPeople = topPeople(currentYearIndex);
@@ -131,6 +122,32 @@
     return newBarHeight - 50;
   }
 
+  function defaultImg(currentPerson) {
+    let noImagePeople;
+    const pageType = document.querySelector(".article-page__article h1").textContent;
+
+    if (currentPerson.image !== "") {
+      return currentPerson.image;
+    }
+
+    switch (pageType) {
+      case "Influential Mathematicians Timeline":
+        if (mathImages[2].indexOf(currentPerson.name) !== -1) {
+          return mathImages[1][mathImages[2].indexOf(currentPerson.name)]
+        }
+        noImagePeople = mathImages[0];
+        break;
+      case "Interactive Tool: Influential Physicists Timeline":
+        noImagePeople = physicsImages[0];
+        break;
+    }
+
+    const person = currentPerson.name.charAt(currentPerson.name.length - 1) === " " ? currentPerson.name.slice(0, -1) : currentPerson.name;
+    return noImagePeople.filter(
+      (image) => image.slice(image.lastIndexOf('.') - person.length, image.indexOf('.png')).replaceAll('_', ' ') == person
+    )
+  }
+
   function changeYeartoBC(year) {
     return year < 0 ? `${-year} BC` : `${year} AD`;
   }
@@ -147,26 +164,6 @@
     }
     
     return previousIndex;
-  }
-
-  function displayRankDifference(currentPerson, index) {
-    const upArrow = "\u25B2";
-    const pageLoadIndex = forwardInTime;
-    const previousIndex = getPreviousIndex(currentPerson, index);
-    const difference = previousIndex - index;
-    if (previousIndex < 0 || pageLoadIndex === undefined) {
-      return ["", "", "none", "rotate(0deg)", "rotate(0deg)"];
-    }
-
-    if (difference < 0) {
-      return [upArrow, difference * -1, "inline-block", "rotate(90deg)", "rotate(180deg)"];
-    }
-    
-    if (difference > 0) {
-      return [upArrow, difference, "inline-block", "rotate(90deg)", "rotate(0deg)"];
-    }
-
-    return ["", "", "none", "rotate(0deg)", "rotate(0deg)"];
   }
 
   function changeBGColor(currentPerson, index) {
@@ -262,9 +259,6 @@
     }
   }
 
-  let personFact;
-  let highlightedPerson;
-
   $: if (previousYearIndex < currentYearIndex) {
     spin += (currentYearIndex - previousYearIndex) * 32;
     forwardInTime = true;
@@ -279,15 +273,6 @@
     personFact.textContent = personFact !== undefined ? displayFact() : "";
     highlightedPerson.src = highlightedPerson !== undefined ? displayImage() : "";
   }
-
-  setTimeout(function() {
-    const interval = setInterval(function() {
-      if (currentYearIndex === data.years.length - 2) {
-        clearInterval(interval);
-      }
-      currentYearIndex += 1;
-    }, 3000)
-  }, 7000);
 
   function displayImage() {
     const year = data.years[currentYearIndex];
@@ -364,12 +349,12 @@
   const scheme1 = ["white", "rgb(231, 108, 38)", ""];
   const scheme2 = ["white", "rgb(1, 117, 161)", ""];
   const scheme3 = ["white", "rgb(255, 133, 20)", ""];
-  const scheme4 = ["white", "rgb(0, 58, 82)", ""];
+  const scheme4 = ["white", "deeppink", ""];
   const scheme5 = ["white", "rgb(247, 93, 51)", ""];
-  const scheme6 = ["black", "rgb(230, 244, 250)", ""];
+  const scheme6 = ["black", "orchid", ""];
   const scheme7 = ["white", "rgb(208, 97, 34)", ""];
-  const scheme8 = ["white", "rgba(1, 73, 101, 0.565)", ""];
-  const scheme9 = ["black", "rgb(249, 184, 100)", ""];
+  const scheme8 = ["white", "rgb(1, 73, 101)", ""];
+  const scheme9 = ["black", "blue", ""];
   let colorSchemes = [scheme0, scheme1, scheme2, scheme3, scheme4, scheme5, scheme6, scheme7, scheme8, scheme9];
 
   function changeBGColor3(currentPerson, index) {
@@ -406,32 +391,11 @@
       colors = colorSchemes.filter((scheme) => scheme[2] === currentPerson.name);
     }
 
-    return colors;
+    return colors[1];
   }
 
   function changeFontColor2(currentPerson, index) {
-    const previousIndex = getPreviousIndex(currentPerson, index);
-
-    if (previousIndex === -1) {
-      return "rgb(255, 133, 20)";
-    }
-
-    if (index < previousIndex && previousIndex >= 0) {
-      return "#0192c9";
-    }
-
-    if (index > previousIndex && previousIndex >= 0) {
-      return "#003a50";
-    }
-
-    return "#0175a1";
-    
-    /*const targetPerson = colorSchemes.filter((scheme) => scheme[2] === currentPerson.name);
-    if (targetPerson[0][1] === "rgb(249, 184, 100)" || targetPerson[0][1] === "rgb(230, 244, 250)") {
-      return "black"
-    }
-
-    return "white";*/
+    return colorSchemes.filter((scheme) => scheme[2] === currentPerson.name)[0][1];
   }
 
   function convertScore2(person) {
@@ -447,6 +411,15 @@
     return (person.score - originalScale[0]) * (graphScale[1] - graphScale[0]) / (originalScale[1] - originalScale[0]) + graphScale[0];
   }
 
+  /*setTimeout(function() {
+    const interval = setInterval(function() {
+      if (currentYearIndex === data.years.length - 2) {
+        clearInterval(interval);
+      }
+      currentYearIndex += 1;
+    }, 3000)
+  }, 5000);*/
+
 </script>
 
 <div class="toggle-display">
@@ -460,20 +433,20 @@
     <p id="current-year-2">{changeYeartoBC(data.years[currentYearIndex])}</p>
     <span class="cover-2" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
     <div style="display: none;" class="person-fact-2">
-      <img style="position: absolute; height:5rem; width: 5rem; left: 0; bottom: -5rem;" bind:this={highlightedPerson} /> 
       <p style="margin: 0;" bind:this={personFact}></p>
-      <p style="font-size:.8rem; position: absolute; bottom: -1.25rem; margin:0; color: black; right:0;">Source: Wikipedia</p>
+      <img style="position: absolute; height:5rem; width: 5rem; right: 0rem; bottom: 0rem; opacity: .75" bind:this={highlightedPerson} /> 
+      <p style="font-size:.8rem; position: absolute; top: -1.25rem; margin:0; color: black; right:0;">Source: Wikipedia</p>
     </div>
     <div class="timeline-graph-2" on:wheel={scrollToChangeYear}>
       {#each topPeople(currentYearIndex) as person, i (person.name)}
         <a out:fly={{ x: -300, duration: 1800, delay: 100 }} in:fly={{ y: 100 * (11 - (i+1)), duration: 2600, delay: 50 }} animate:flip|local={{ duration: 2600, delay: 25 }} class="rank-2" href="/people/{person.slug}" target="_blank">
           <img src={defaultImg(person)} style="margin-right:.25rem; width:46px; height:46px" alt="image of {person.name}" />
-          <div class="grid-2 grid-ref-{i}" style="background-color:{changeBGColor3(person, i)[1]}; width:{convertScore2(person)}px"></div>
+          <div class="grid-2" style="background-color:{changeBGColor3(person, i)}; width:{convertScore2(person)}px"></div>
           <p class="name-plate-2" style="color:{changeFontColor2(person, i)};">{person.name}</p>
-          <div style="color:{changeBGColor(person, i)}; min-width: 2rem;" class="ranking-difference-2">
+          <!--<div style="color:{changeBGColor(person, i)}; min-width: 2rem;" class="ranking-difference-2">
             <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
             <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
-          </div>
+          </div>-->
         </a>
       {/each}
     </div>
@@ -496,55 +469,7 @@
   <input type="checkbox" id="switch" on:click={toggleVersions} />
   <label for="switch"></label>
 </div>
-{#if (!mobileVersion && !altVersion) || (mobileVersion && altVersion)}
-<div class="timeline-page-content" in:fade={{ duration: 200, delay: 700 }} out:fly={{ x: 500, duration: 750 }}>
-  <div class="timeline-container">
-    <p id="current-year">{changeYeartoBC(data.years[currentYearIndex])}</p>
-    <span class="cover" style="transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
-    <div class="timeline-graph" on:wheel={scrollToChangeYear}>
-      {#each topPeople(currentYearIndex) as person, i (person.name)}
-        <div 
-          animate:flip|local={{ duration: 500, delay: 25 }}
-          style="left:{spaceOutGraph(i)[0]}px; top:{spaceOutGraph(i)[1]}px;" 
-          class="rank" 
-          id="rank-{i+1}"
-        >
-          <div out:fly={{ y: 100, duration: 300, delay: 100 }} in:fly={{ y: 100, duration: 500, delay: 50 }} class="person-data">
-            <div style="background-color:{changeBGColor(person, i)}" class="ranking-difference">
-              <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
-              <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
-            </div>
-            <a href="/people/{person.slug}" target="_blank">
-              <img src={defaultImg(person)} width="64" height="64" alt="image of {person.name}" />
-            </a>
-          </div>
-          <div out:fly={{ y: 100, duration: 10, delay: 100 }} class="grid grid-left" id="grid-{i+1}" style="height:{convertScore(person)}px">
-            <div class="face front"></div>
-            <div class="face back" style="background-color:{highlightNameMobile(person, i)}">
-              <p class="name-plate" id="{person.name}" style="color:{changeFontColor(person, i)}; background-color:{highlightName(person, i)}">{person.name}</p>
-            </div>
-            <div class="face right"></div>
-            <div class="face left"></div>
-            <div class="face top" style="height:{modifyEndHeights(convertScore(person))}%"></div>
-            <div class="face bottom" style="height:{modifyEndHeights(convertScore(person))}%; transform: rotateX(-90deg) translateZ({modifyBottomFace(convertScore(person))}px);"></div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-  <div class="control-buttons">
-    <button type="button" on:click={goBackInTime}>Reverse</button>
-    <button type="button" on:click={goForwardInTime}>Forward</button>
-    <input
-      id="formControlRange"
-      type="range"
-      min=0
-      max={data.years.length - 1}
-      bind:value={currentYearIndex}
-    />
-  </div>
-</div>
-{:else}
+
 <div class="timeline-page-content mobile" in:fade={{ duration: 200, delay: 700 }} out:fly={{ x: -500, duration: 750 }}>
   <div class="timeline-container mobile">
     <p id="current-year" class="mobile">{changeYeartoBC(data.years[currentYearIndex])}</p>
@@ -677,8 +602,8 @@ input[type=checkbox] + label:active:after {
   font-size: 2.5rem;
   position: absolute;
   z-index: 1;
-  top: 1rem;
-  right: 1rem;
+  top: 7rem;
+  right: 0rem;
   background-color: #0175a1;
   border-radius: 6px;
   padding: 1rem .75rem;
@@ -692,8 +617,8 @@ input[type=checkbox] + label:active:after {
   position: absolute;
   z-index: 1;
   margin: 0;
-  bottom: 3rem;
-  right: 18.5rem;
+  top: 14rem;
+  left: 57.5rem;
   background-color: #0175a1;
   border-radius: 6px;
   padding: 1rem .75rem;
@@ -712,8 +637,8 @@ input[type=checkbox] + label:active:after {
   transition: transform linear 3s;
   width: 13rem;
   height: 13rem;
-  right: 2rem;
-  bottom: 0rem;
+  right: 1rem;
+  top: 0rem;
   z-index: 0;
 }
 
@@ -731,9 +656,9 @@ input[type=checkbox] + label:active:after {
 .person-fact-2 {
   position: absolute;
   right: 1rem;
-  bottom: 14rem;
+  bottom: 0rem;
   padding: .75rem;
-  height: fit-content;
+  height: 20rem;
   width: 29rem;
   background-color: #0175a1;
   color: white;
@@ -760,6 +685,7 @@ input[type=checkbox] + label:active:after {
   font-size: 1rem;
   line-height: initial;
   padding: 0 .5rem;
+  background-color: white;
 }
 
 .cover {

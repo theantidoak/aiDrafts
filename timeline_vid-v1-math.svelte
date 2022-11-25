@@ -1,6 +1,7 @@
 <script>
   import { fly, fade } from 'svelte/transition';
   import { flip } from 'svelte/animate';
+  import { physicsImages, mathImages } from './person-timeline-images';
   export let data;
   let spin = 0;
   let currentYearIndex = 0;
@@ -11,6 +12,9 @@
   let altVersion = false;
   let forwardInTime;
   let backCount = false;
+  let forwardCount = false;
+  let scaleUp;
+  let increaseGap;
 
   document.documentElement.style.overflowX = "hidden";
 
@@ -42,32 +46,66 @@
     return people.slice(0, 10);
   }
 
-  function allPeople() {
-    const people = data.items
-      .filter(
-        (person) => person.image !== ""
-      )
+  const peopleWithImages = data.items
+    .filter(
+      (person) => {
+        if (person.name === "Victor Kolyvagin" || person.image !== "") {
+          return person;
+        }
+      }
+    );
+    
 
+  function allPeople() {
+    const people = peopleWithImages;
     const spinCover = setInterval(function() {
-      spin += 8;
-      if (spin === 71 * 8) {
+      spin += 4;
+      console.log(people.length);
+      if (spin === (people.length / 2.5) * 4) {
         clearInterval(spinCover)
       }
-    }, 200);
+    }, 250);
+
     return people;
   }
 
+  $: if (backCount && currentYearIndex === 0) {
+    forwardCount = true;
+    backCount = false;
+  }
+
+  $: if (!forwardCount && currentYearIndex === data.years.length - 1) {
+    spin = (data.years.length - 1) * 8;
+  }
+
+  $: if (currentYearIndex === 3 || currentYearIndex === 4) {
+    scaleUp = 2;
+  } else {
+    scaleUp = 1;
+  }
+
+  $: if (currentYearIndex === 3 || currentYearIndex === 4) {
+    increaseGap = 4;
+  } else {
+    increaseGap = .5;
+  }
+
+  function changeImage(currentPerson) {
+    if (currentPerson.name === "Victor Kolyvagin") {
+      return "https://res.cloudinary.com/academicinfluence/image/upload/v1669123499/timeline-video/openAI-Math/Victor_Kolyvagin.png"
+    }
+    return currentPerson.image;
+  }
+
+
   function thisYearPeople(currentYearIndex) {
     const people2021 = topPeople(data.years.length - 1);
-    let people = data.items
-        .filter(
-          (person) => person.image !== ""
-        )
+    let people = peopleWithImages;
     if (currentYearIndex === 2) {
       people.forEach(
         (person) => {
           if (!people2021.map((pers) => pers.image).includes(person.image)) {
-              person.hide = true;
+            person.hide = true;
           }
         })
     } else if (currentYearIndex === 3) {
@@ -76,9 +114,9 @@
           (person) => people2021.map((pers) => pers.image).includes(person.image)
         )
     } else if (currentYearIndex === 4) {
-      people = people2021
+      people = people2021;
     } else {
-      people = []
+      people = [];
     }
 
     return people;
@@ -109,26 +147,16 @@
     return 1;
   }
 
-  function goToLastYear() {
-    currentYearIndex = data.years.length - 1;
-    backCount = true;
-  }
-
-  function countBack() {
-    const countingBack = setInterval(function() {
-      if (currentYearIndex === 1){
-        clearInterval(countingBack)
-      }
-      currentYearIndex -= 1;
-    }, 50)
-  }
-
   function controlSpeed(currentYearIndex) {
+    if (forwardCount === true) {
+      return "transform linear 2.25s";
+    }
+
     if (backCount === true && currentYearIndex) {
       return "transform linear 0s";
-    } else {
-      return "transform linear .5s";
-    }
+    } 
+    
+    return "transform linear .5s";
   }
 
   function topPeople(index) {
@@ -140,9 +168,6 @@
         ...person,
         score: person.years[index - person.skip],
       }));
-    people = data.years[index] > 1900
-      ? people.filter((person) => data.years[index] - person.birthYear < 99) 
-      : people;
     people.sort((a, b) => b.score - a.score);
 
     return screenSizeOutput(people);
@@ -181,14 +206,6 @@
   function goBackInTime() {
     if (currentYearIndex === 0) return;
     currentYearIndex -= 1;
-  }
-
-  function defaultImg(person) {
-    if (person.image === "") {
-      return "https://res.cloudinary.com/academicinfluence/image/upload/v1667505750/getting-started/Screenshot_2022-11-03_at_21.01.57.png"
-    }
-
-    return person.image;
   }
 
   function convertScore(person) {
@@ -238,12 +255,38 @@
     return previousIndex;
   }
 
+  function defaultImg(currentPerson) {
+    let noImagePeople;
+    const pageType = document.querySelector(".article-page__article h1").textContent;
+
+    if (currentPerson.image !== "") {
+      return currentPerson.image;
+    }
+
+    switch (pageType) {
+      case "Influential Mathematicians Timeline":
+        if (mathImages[2].indexOf(currentPerson.name) !== -1) {
+          return mathImages[1][mathImages[2].indexOf(currentPerson.name)]
+        }
+        noImagePeople = mathImages[0];
+        break;
+      case "Interactive Tool: Influential Physicists Timeline":
+        noImagePeople = physicsImages[0];
+        break;
+    }
+
+    const person = currentPerson.name.charAt(currentPerson.name.length - 1) === " " ? currentPerson.name.slice(0, -1) : currentPerson.name;
+    return noImagePeople.filter(
+      (image) => image.slice(image.lastIndexOf('.') - person.length, image.indexOf('.png')).replaceAll('_', ' ') == person
+    )
+  }
+
   function displayRankDifference(currentPerson, index) {
     const upArrow = "\u25B2";
     const pageLoadIndex = forwardInTime;
     const previousIndex = getPreviousIndex(currentPerson, index);
     const difference = previousIndex - index;
-    if (previousIndex < 0 || pageLoadIndex === undefined) {
+    if (previousIndex < 0 || pageLoadIndex === undefined || (forwardCount && currentYearIndex === 0)) {
       return ["", "", "none", "rotate(0deg)", "rotate(0deg)"];
     }
 
@@ -260,6 +303,10 @@
 
   function changeBGColor(currentPerson, index) {
     const previousIndex = getPreviousIndex(currentPerson, index);
+    if (forwardCount && currentYearIndex === 0) {
+      return "#f6d267ef";
+    }
+
     if (index < previousIndex && previousIndex >= 0) {
       return "#0192c9";
     }
@@ -289,6 +336,10 @@
 
   function changeFontColor(currentPerson, index) {
     const previousIndex = getPreviousIndex(currentPerson, index);
+    if (forwardCount && currentYearIndex === 0) {
+      return "#000000";
+    }
+
     if ((index < previousIndex || index > previousIndex) && previousIndex >= 0) {
       return "#ffffff";
     }
@@ -360,11 +411,32 @@
     forwardInTime = false;
     previousYearIndex = currentYearIndex;
   }
+
+  function goToLastYear() {
+    currentYearIndex = data.years.length - 1;
+    backCount = true;
+  }
+
+  function countBack() {
+    const countingBack = setInterval(function() {
+      if (currentYearIndex === 1){
+        clearInterval(countingBack)
+      }
+      currentYearIndex -= 1;
+    }, 50)
+  }
+
+  function playTimeline() {
+    const interval = setInterval(function() {
+      currentYearIndex += 1;
+      spin += 16;
+      if (currentYearIndex === data.years.length - 1) {
+        clearInterval(interval);
+      }
+    }, 2000)
+  }
+
 </script>
-
-<button on:click={goToLastYear}>Last Year</button>
-<button on:click={countBack}>Count back</button>
-
 <div class="toggle-display">
   <p class="change-display">See other version: </p>
   <input type="checkbox" id="switch" on:click={toggleVersions} />
@@ -376,38 +448,26 @@
     <span class="cover" style="-webkit-transition: {controlSpeed(currentYearIndex)}; transition: {controlSpeed(currentYearIndex)}; transform: rotate({spin}deg); -webkit-transform: rotate({spin}deg)" />
     {#if backCount === true && currentYearIndex !== 0}
     <p out:scaleIn in:scaleIn id="current-year" style="transform: scale(3); top: 0; right: 0; bottom: 0; left: 0; width: fit-content; height: fit-content; margin: auto">{changeYeartoBC(data.years[currentYearIndex])}</p>
-    {:else if currentYearIndex === 1}
-    <div class="timeline-graph-video" on:wheel={scrollToChangeYear}>
-      {#each allPeople() as person, i (person.name)}
-        <img src={person.image} width="64" height="64" alt=" " in:fly={{ x: -1000, duration: 500, delay: i*200 }} />
-      {/each}
-    </div>
-    {:else if currentYearIndex !== 0}
-    <div class="timeline-graph-video" on:wheel={scrollToChangeYear}>
-      {#each thisYearPeople(currentYearIndex) as person, i (person.name)}
-        <img src={person.image} width="64" height="64" alt=" " in:fadeOut={{cond: person.hide}} out:fade={{ duration: 500 }} animate:flip={{ duration: 750 }} style="opacity:{hideImages(person)}" />
-      {/each}
-    </div>
-    {:else if backCount === true && currentYearIndex === 0}
+    {:else if forwardCount}
     <p in:scaleIn id="current-year">{changeYeartoBC(data.years[currentYearIndex])}</p>
     <div in:fly={{ y: 500, duration: 500, delay: 1000 }} class="timeline-graph" on:wheel={scrollToChangeYear}>
       {#each topPeople(currentYearIndex) as person, i (person.name)}
         <div 
-          animate:flip|local={{ duration: 500, delay: 25 }}
+          animate:flip|local={{ duration: 1000, delay: 25 }}
           style="left:{spaceOutGraph(i)[0]}px; top:{spaceOutGraph(i)[1]}px;" 
           class="rank" 
           id="rank-{i+1}"
         >
-          <div out:fly={{ y: 100, duration: 300, delay: 100 }} in:fly={{ y: 100, duration: 500, delay: 50 }} class="person-data">
+          <div out:fly={{ y: 100, duration: 800, delay: 100 }} in:fly={{ y: 100, duration: 1000, delay: 50 }} class="person-data">
             <div style="background-color:{changeBGColor(person, i)}" class="ranking-difference">
               <span style="display:{displayRankDifference(person, i)[2]}; --start-rotate:{displayRankDifference(person, i)[3]}; --end-rotate:{displayRankDifference(person, i)[4]}" id="arrow-direction-{person.name}" class="arrow-direction">{displayRankDifference(person, i)[0]}</span>
               <span id="ranking-change-{person.name}">{displayRankDifference(person, i)[1]}</span>
             </div>
             <a href="/people/{person.slug}" target="_blank">
-              <img src={defaultImg(person)} width="64" height="64" alt="image of {person.name}" />
+              <img src={defaultImg(person)} style="background-color: white" width="64" height="64" alt="image of {person.name}" />
             </a>
           </div>
-          <div out:fly={{ y: 100, duration: 10, delay: 100 }} class="grid grid-left" id="grid-{i+1}" style="height:{convertScore(person)}px">
+          <div out:fly={{ y: 100, duration: 510, delay: 100 }} class="grid grid-left" id="grid-{i+1}" style="height:{convertScore(person)}px">
             <div class="face front"></div>
             <div class="face back" style="background-color:{highlightNameMobile(person, i)}">
               <p class="name-plate" id="{person.name}" style="color:{changeFontColor(person, i)}; background-color:{highlightName(person, i)}">{person.name}</p>
@@ -420,19 +480,17 @@
         </div>
       {/each}
     </div>
-    {:else if currentYearIndex === 0}
-    <div class="timeline-graph-video" on:wheel={scrollToChangeYear}>
-      <div class="image-container">
-        <!--<img class="speakers" style="position:absolute; width: 100%; height:100%" src="https://res.cloudinary.com/academicinfluence/image/upload/v1668427669/timeline-video/Screenshot_2022-11-14_at_12.57.25.png" />-->
-        <div class="thermo-div">
-          <div class="outer-thermo"><div class="inner-thermo"></div></div>
-          <img class="thermometer" style="position:absolute; width: 100%; height:100%" src="https://res.cloudinary.com/academicinfluence/image/upload/v1668427670/timeline-video/Screenshot_2022-11-14_at_12.58.22.png" />
-        </div>
-        <!--<video src="https://res.cloudinary.com/academicinfluence/video/upload/v1668446171/timeline-video/temp-vid.mp4" loop autoplay muted />
-        <video src="https://res.cloudinary.com/academicinfluence/video/upload/v1668446166/timeline-video/speaker-vid.mp4" loop autoplay muted />
-        <video src="https://res.cloudinary.com/academicinfluence/video/upload/v1668446158/timeline-video/magnet-vid.mp4" loop autoplay muted />
-        <video src="https://res.cloudinary.com/academicinfluence/video/upload/v1668446158/timeline-video/atom-vid.mp4" loop autoplay muted />-->
-      </div>
+    {:else if currentYearIndex === 1}
+    <div style="gap: {increaseGap}rem" class="timeline-graph-video" on:wheel={scrollToChangeYear}>
+      {#each allPeople() as person, i (person.name)}
+        <img src={changeImage(person)} style="background-color: white" width="42" height="42" alt=" " in:fly={{ x: -1000, duration: 500, delay: i*100 }} />
+      {/each}
+    </div>
+    {:else if currentYearIndex !== 0}
+    <div style="gap: {increaseGap}rem" class="timeline-graph-video" on:wheel={scrollToChangeYear}>
+      {#each thisYearPeople(currentYearIndex) as person, i (person.name)}
+        <img src={changeImage(person)} width="42" height="42" alt=" " in:fadeOut={{cond: person.hide}} out:fade={{ duration: 500 }} animate:flip={{ duration: 750 }} style="background-color: white; transform: scale({scaleUp}); transition: transform 1.5s linear; opacity:{hideImages(person)}" />
+      {/each}
     </div>
     {/if}
   </div>
@@ -448,6 +506,11 @@
       bind:value={currentYearIndex}
     />
   </div>
+  <div style="position: absolute; left: 1rem; top: 60rem; display:flex; flex-direction:column">
+    <button on:click={goToLastYear}>Last Year</button>
+    <button on:click={countBack}>Count back</button>
+    <button on:click={playTimeline}>Play</button>
+  </div>
 </div>
 
 <style>
@@ -461,10 +524,11 @@
   flex-wrap: wrap;
   z-index: 5;
   position: relative;
-  gap: 1.5rem;
-  padding: 2rem;
+  gap: .4rem;
+  padding: .15rem;
 }
 
+/*
 .image-container {
   position: absolute;
   width: 100%;
@@ -508,7 +572,7 @@ video {
   0% { height: 100% }
   50% { height: 0% }
   100% { height: 100% }
-}
+}*/
 
 :root {
   --start-translate: translateY(200px);
@@ -612,7 +676,7 @@ input[type=checkbox] + label:active:after {
   will-change: transform;
   width: 126%;
   height: 82rem;
-  right: -14%;
+  right: -13%;
   top: 0;
   bottom: 0;
   margin: auto 0;
